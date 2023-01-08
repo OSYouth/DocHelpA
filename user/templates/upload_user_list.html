@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生选题信息 上传</title>
+    <style>
+        .topic_info {
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="topic_info">
+    <br><h3>学生选题信息上传</h3><hr><br>
+    <p>请下载模板填写后再上传</p>
+    <br><br>
+    <form action="/user/upload_user_list" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>
+            <input type="file" name="user_list"
+                   accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        </p>
+        <p>
+            <input type="submit" value="上传">
+        </p>
+    </form>
+    <a href="/grades_analysis/download_grade_analysis/{{ message }}">学生选题信息模板下载</a>
+</div>
+</body>
+</html>
