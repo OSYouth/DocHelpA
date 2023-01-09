@@ -14,7 +14,7 @@ class UserInfo(AbstractUser):
     # 充值积分
     charge_point = models.IntegerField('充值积分', default=0)
     # 赠送积分
-    bonus_point = models.IntegerField('赠送积分', default=1000)
+    bonus_point = models.IntegerField('赠送积分', default=1200)
     # 备用字段
     in_case = models.CharField('备用字段', max_length=100, default='')
     # 教研室（教师）/专业（学生）
@@ -22,11 +22,11 @@ class UserInfo(AbstractUser):
     # 职称（教师）
     title = models.CharField('职称', max_length=30, default='')
     class Meta:
-        verbose_name = "用户信息"
+        verbose_name = "1.用户信息"
         verbose_name_plural = verbose_name
 
 class InstructorBatch(models.Model):
     instructor_file = models.FileField("教师信息文件", upload_to="instructor_info/")
     class Meta:
-        verbose_name = "教师用户批量创建"
+        verbose_name = "教师用户批量创建（管理员）"
         verbose_name_plural = verbose_name
