@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% block extrastyle %}{{ block.super }}
+    <style>
+        .template_download {
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}{{ block.super }}
+    <div class="template_download">
+        <p style="color: red">请按照模板格式填写所有字段信息后再上传，注意答辩日期格式</p>
+        <a href="/static/学生毕业设计答辩安排模板.xlsx">学生毕业设计答辩安排模板.xlsx</a><br>
+    </div>
+{% endblock %}

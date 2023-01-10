@@ -28,5 +28,5 @@ class UserInfo(AbstractUser):
 class InstructorBatch(models.Model):
     instructor_file = models.FileField("教师信息文件", upload_to="instructor_info/")
     class Meta:
-        verbose_name = "教师用户批量创建（管理员）"
+        verbose_name = "0.教师用户批量创建（管理员）"
         verbose_name_plural = verbose_name

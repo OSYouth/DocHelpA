@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% block extrastyle %}{{ block.super }}
+    <style>
+        .template_download {
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}{{ block.super }}
+    <div class="template_download">
+        <p style="color: red">替换字的使用可以参考如下文件</p>
+        <a href="/static/毕业设计任务书（以大数据技术专业为例）.doc">毕业设计任务书（以大数据技术专业为例）.doc</a><br>
+    </div>
+{% endblock %}

@@ -11,14 +11,14 @@ from django.shortcuts import render, redirect
 @admin.register(TopicBatch)
 class TopicBatchAdmin(admin.ModelAdmin):
     list_display = ['topic_file']
-
+    add_form_template = 'admin/graduate/topicbatch/add/add_topic.html'
     def add_view(self, request, form_url="", extra_context=None):
         if request.FILES.get('topic_file'):
             file = request.FILES.get('topic_file')
             if file.name.split(".")[-1] not in ['xls', 'xlsx']:
                 extra_context = '上传文件格式错误'
                 return redirect('/user/upload_error')
-            stu_data = pd.read_excel(file)
+            stu_data = pd.read_excel(file).replace("\s+","",regex=True)
             # 用户组权限设置
             # 参考 https://www.cnblogs.com/55zjc/p/16544103.html
             group = Group.objects.filter(name="学生")
@@ -33,14 +33,13 @@ class TopicBatchAdmin(admin.ModelAdmin):
             extra_context = '上传成功'
         return self.changeform_view(request, None, form_url, extra_context)
 
-
 # 3.毕业设计任务书模板设定
 @admin.register(AssignmentTemplate)
 class AssignmentTemplateAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/graduate/assignmenttemplate/change_assignmenttemplate.html'
     list_display = ['instructor']
-    readonly_fields = ['instruction','instructor']
-    # fields = ['username', ('last_name', 'first_name'), ('dept_name', 'major'), 'title', ('phone', 'email'), 'sign']
-
+    readonly_fields = ['instruction', 'schdeule']
+    fields = ['instruction', 'cachet', 'para1', 'para2', 'para3', 'para4', 'para5', 'para6', 'task_require', 'step_way', 'schdeule', 'thought', 'result']
     def get_queryset(self, request):
         qs = super(AssignmentTemplateAdmin, self).get_queryset(request)
         if request.user.is_superuser:
@@ -51,24 +50,23 @@ class AssignmentTemplateAdmin(admin.ModelAdmin):
 @admin.register(DefenceBatch)
 class DefenceBatchAdmin(admin.ModelAdmin):
     list_display = ['defence_file']
-
+    add_form_template = 'admin/graduate/defencebatch/add/add_defence.html'
     def add_view(self, request, form_url="", extra_context=None):
         if request.FILES.get('defence_file'):
             file = request.FILES.get('defence_file')
             if file.name.split(".")[-1] not in ['xls', 'xlsx']:
                 extra_context = '上传文件格式错误'
                 return redirect('/user/upload_error')
-            defence_data = pd.read_excel(file)
+            defence_data = pd.read_excel(file).replace("\s+","",regex=True)
             for i in range(defence_data.shape[0]):
                 create_defence_info(defence_data.iloc[i].to_dict())
             extra_context = '上传成功'
         return self.changeform_view(request, None, form_url, extra_context)
 
-
 # 5.毕业设计信息完善（还有关键词要填）
 @admin.register(GraduateProjectInfo)
 class GraduateProjectInfoAdmin(admin.ModelAdmin):
-    # AssignmentTemplate.objects.get()
+    change_list_template = 'admin/graduate/graduateprojectinfo/info_list.html'
     list_display = ['stu', 'class_name', 'topic','instructor']
     fields = [('topic', 'instructor'), ('class_name', 'stu'), ('dean', 'director'), 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
     readonly_fields = ['topic', 'class_name', 'instructor', 'stu']
@@ -103,3 +101,4 @@ def create_defence_info(dic):
                                    def_inst6=dic.get('答辩教师6'))
     except IntegrityError:  # 重复键值
         pass
+

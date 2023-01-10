@@ -35,7 +35,7 @@ class InstructorBatchAdmin(admin.ModelAdmin):
             if file.name.split(".")[-1] not in ['xls', 'xlsx']:
                 extra_context = '上传文件格式错误'
                 return redirect('/user/upload_error')
-            user_data = pd.read_excel(file)
+            user_data = pd.read_excel(file).replace("\s+","",regex=True)
             # 用户组权限设置
             # 参考 https://www.cnblogs.com/55zjc/p/16544103.html
             group = Group.objects.filter(name="教师")
