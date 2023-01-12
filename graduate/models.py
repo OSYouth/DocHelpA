@@ -31,15 +31,17 @@ class AssignmentTemplate(models.Model):
     task_require = models.TextField('二、毕业设计任务及要求')
     step_way = models.TextField('三、毕业设计实施步骤和方法')
     schdeule = models.TextField('四、毕业设计进程安排',
-                                default=f'''1．选题：\t{time.localtime().tm_year - 1}年11月23日-{time.localtime().tm_year - 1}年11月27日\n
-                                            2．撰写开题提纲：\t{time.localtime().tm_year - 1}年11月30日-{time.localtime().tm_year - 1}年12月13日\n
-                                            3．收集资料及实施设计\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日\n
-                                            4．完成毕业设计初稿：\t{time.localtime().tm_year}年3月1日前\n
-                                            5．完成毕业设计修改稿:\t{time.localtime().tm_year}年3月30日前\n
-                                            6．完成毕业设计定稿：\t{time.localtime().tm_year}年4月25日前\n
-                                            7．答辩：\t{time.localtime().tm_year}年5月18日前\n''')
+                                default=f'''1．选题：\t{time.localtime().tm_year - 1}年11月23日-{time.localtime().tm_year - 1}年11月27日
+                                            2．撰写开题提纲：\t{time.localtime().tm_year - 1}年11月30日-{time.localtime().tm_year - 1}年12月13日
+                                            3．收集资料及实施设计\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日
+                                            4．完成毕业设计初稿：\t{time.localtime().tm_year}年3月1日前
+                                            5．完成毕业设计修改稿:\t{time.localtime().tm_year}年3月30日前
+                                            6．完成毕业设计定稿：\t{time.localtime().tm_year}年4月25日前
+                                            7．答辩：\t{time.localtime().tm_year}年5月18日前''')
     thought = models.TextField('五、设计思路')
     result = models.TextField('六、成果表现形式')
+    comment = models.TextField('指导教师意见', default='')
+    rws_date = models.CharField('任务书落款日期', max_length=30, default=f'{time.localtime().tm_year - 1}年12月10日')
     instructor = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
 
     class Meta:
@@ -103,6 +105,7 @@ class DefenceInfo(models.Model):
     design_type = models.CharField("毕业设计类型", max_length=20, default='')
     defence_date = models.CharField('答辩日期（格式2022年05月10日）', max_length=30, default='')
     defence_location = models.CharField("答辩地点", max_length=30, default='')
+    recorder = models.CharField('记录人', max_length=30, default='*')
     ach_grade = models.CharField('成果成绩', max_length=10, default='')
     defence_grade = models.CharField('答辩成绩', max_length=10, default='')
     final_grade = models.CharField("最终成绩", max_length=10, default='')

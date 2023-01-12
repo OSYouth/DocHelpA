@@ -17,7 +17,8 @@ def download(request):
     # 根据指导老师、时间，按学号创建文件夹，并对每个学生生成4个文件
     # 根据指导老师、时间，按文件名创建文件夹，并生成指导老师名下所有的学生的文件
     # name = generate_zdjlb('201904040111', '00530')
-    name = generate_pyb('201904040111', '00530')
+    # name = generate_pyb('201904040111', '00530')
+    name = generate_rws('201904040111', '00530')
     return render(request, 'upload_success.html', locals())
 
 def download_test(request, name):
@@ -28,23 +29,26 @@ def download_test(request, name):
     return response
 
 # 生成毕业设计任务书
-def generate_rws(stu_no):
+def generate_rws(stu_no, inst_no):
     stu = UserInfo.objects.get(username=stu_no)
+    inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
-    word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计任务书.docx"
+    temp = AssignmentTemplate.objects.get(instructor=inst)
+    word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计答辩记录表.docx"
     word = Document()
-
     # 先对于文档英文为Arial，中文为宋体所有字体设置为小四，所有字体设置为小四，
     word.styles['Normal'].font.name = 'Arial'
     word.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
     word.styles['Normal'].font.size = Pt(12)
+    word.sections[0].left_margin = Cm(2.1)
+    word.sections[0].right_margin = Cm(2.1)
     title = word.add_paragraph('湖南商务职业技术学院毕业设计任务书')
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in title.runs:
         run.font.size = Pt(18)
         run.font.bold = True
-    table = word.add_table(rows=3, cols=6, style='Table Grid')
+    table = word.add_table(rows=9, cols=6, style='Table Grid')
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     # 表头前三行对齐格式统一
     align_cccccl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
@@ -83,9 +87,77 @@ def generate_rws(stu_no):
         cell.paragraphs[0].paragraph_format.alignment = align
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         cell.paragraphs[0].add_run(ele)
-    for i in range(3):
-        table.rows[i].height = Cm(1)
+    # 从第四行开始，全部都只有一个单元格
+    for i in range(3,9):
+        table.rows[i].cells[0].merge(table.rows[i].cells[5])
+    table.rows[3].cells[0].paragraphs[0].add_run('一、毕业设计目标')
+    design_object = temp.para1+stu_project.key_word1+temp.para2+stu_project.key_word2+temp.para3+stu_project.key_word3+temp.para4+stu_project.key_word4+temp.para5+stu_project.key_word5+temp.para6
+    table.rows[3].cells[0].add_paragraph().add_run('\t'+design_object.strip('*'))
 
+    table.rows[4].cells[0].paragraphs[0].add_run('二、毕业设计任务及要求')
+    table.rows[4].cells[0].add_paragraph().add_run('\t'+temp.task_require.replace('\r\n','\n\t'))
+
+    table.rows[5].cells[0].paragraphs[0].add_run('三、毕业设计实施步骤和方法')
+    table.rows[5].cells[0].add_paragraph().add_run('\t'+temp.step_way.replace('\r\n','\n\t'))
+
+    table.rows[6].cells[0].paragraphs[0].add_run('四、毕业设计进程安排')
+    table.rows[6].cells[0].add_paragraph().add_run('\t'+temp.schdeule.replace('\n\n','\n\t'))
+
+    table.rows[7].cells[0].paragraphs[0].add_run('五、设计思路')
+    table.rows[7].cells[0].add_paragraph().add_run('\t'+temp.thought.replace('\r\n','\n\t'))
+
+    table.rows[8].cells[0].paragraphs[0].add_run('六、成果表现形式')
+    table.rows[8].cells[0].add_paragraph().add_run('\t'+temp.result.replace('\r\n','\n\t'))
+
+    # 保证table格式里面的行高至少为1cm
+    for i in range(9):
+        table.rows[i].height = Cm(1)
+        for cell in table.rows[i].cells:
+            for p in cell.paragraphs:
+                p.paragraph_format.line_spacing = Pt(20)
+                p.paragraph_format.space_after = Pt(0)
+
+    table2 = word.add_table(rows=2, cols=14, style='Table Grid')
+    table2.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table2.rows[0].cells[1].merge(table2.rows[0].cells[13])
+    table2.rows[0].cells[0].paragraphs[0].add_run('指导教师意见')
+    table2.rows[0].cells[1].add_paragraph().add_run(temp.comment)
+    p10 = table2.rows[0].cells[1].add_paragraph('签字：')
+    p10.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    p10.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    table2.rows[0].cells[1].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    table2.rows[1].cells[1].merge(table2.rows[1].cells[6])
+    table2.rows[1].cells[8].merge(table2.rows[1].cells[13])
+    table2.rows[1].cells[0].paragraphs[0].add_run('教研室主任审批意见')
+    table2.rows[1].cells[1].add_paragraph('      同意实施')
+    table2.rows[1].cells[1].add_paragraph()
+    p11_1 = table2.rows[1].cells[1].add_paragraph('签字：')
+    p11_1.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    p11_1.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    table2.rows[1].cells[1].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    table2.rows[1].cells[7].paragraphs[0].add_run('学院审批意见')
+    table2.rows[1].cells[7].paragraphs[0].width = Cm(2.1)
+    table2.rows[1].cells[8].add_paragraph('      同意实施')
+    table2.rows[1].cells[8].add_paragraph()
+    p11_2 = table2.rows[1].cells[8].add_paragraph('签字：')
+    p11_2.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p11_2.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.5))
+    # p11_2.add_run().add_picture(f'media/{temp.cachet}', width=Cm(4))
+    table2.rows[1].cells[8].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    for i in range(2):
+        table2.rows[i].height = Cm(1)
+
+    bz1 = word.add_paragraph('注：1. 设计类型包括产品设计、流程设计或方案设计。')
+    bz2 = word.add_paragraph('       2. 本表一式两份，一份二级学院留存，一份发给学生。')
+    bz3 = word.add_paragraph('       3. 所有签字处必须手写，其他内容可打印，未签字者，不予开题。')
+    for p in [bz1, bz2, bz3]:
+        p.line_spacing_rule = WD_LINE_SPACING.EXACTLY
+        p.paragraph_format.line_spacing = Pt(12)
+        p.paragraph_format.space_after = Pt(0)
+        for run in p.runs:
+            run.font.size = Pt(10.5)
 
     word.save(f'media/download_files/{word_name}')
     return word_name
@@ -347,7 +419,7 @@ def generate_pyb(stu_no, inst_no):
     row4_7.add_run('进行评定。').font.size = Pt(10.5)
     for p in table.rows[3].cells[0].paragraphs:
         p.paragraph_format.first_line_indent = Pt(21)
-        p.line_spacingpacing_rule = WD_LINE_SPACING.EXACTLY
+        p.line_spacing_rule = WD_LINE_SPACING.EXACTLY
         # p.paragraph_format.line_spacing = Pt(12)
         p.paragraph_format.space_after = Pt(0)
 
@@ -399,7 +471,7 @@ def generate_pyb(stu_no, inst_no):
 
     bz = word.add_paragraph('注：设计类型指产品设计、流程设计或方案设计。')
     bz.paragraph_format.line_spacing = Pt(15)
-    bz.line_spacingpacing_rule = WD_LINE_SPACING.EXACTLY
+    bz.line_spacing_rule = WD_LINE_SPACING.EXACTLY
     for run in bz.runs:
         run.font.size = Pt(10.5)
 
@@ -408,8 +480,9 @@ def generate_pyb(stu_no, inst_no):
 
 
 # 生成毕业设计答辩记录表
-def generate_dbjlb(stu_no):
+def generate_dbjlb(stu_no, inst_no):
     stu = UserInfo.objects.get(username=stu_no)
+    inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
     word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计答辩记录表.docx"
@@ -418,12 +491,14 @@ def generate_dbjlb(stu_no):
     word.styles['Normal'].font.name = 'Arial'
     word.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
     word.styles['Normal'].font.size = Pt(12)
+    word.sections[0].left_margin = Cm(2.1)
+    word.sections[0].right_margin = Cm(2.1)
     title = word.add_paragraph('湖南商务职业技术学院毕业设计答辩记录表')
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in title.runs:
         run.font.size = Pt(18)
         run.font.bold = True
-    table = word.add_table(rows=3, cols=6, style='Table Grid')
+    table = word.add_table(rows=7, cols=6, style='Table Grid')
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     # 表头前三行对齐格式统一
     align_cccccl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
@@ -462,8 +537,67 @@ def generate_dbjlb(stu_no):
         cell.paragraphs[0].paragraph_format.alignment = align
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         cell.paragraphs[0].add_run(ele)
-    for i in range(3):
+
+    row4 = []  # 第4行的元素值用列表存储
+    row4.append("答辩时间")
+    row4.append('')
+    row4.append('')
+    row4.append(stu_defence.defence_date)
+    row4.append("答辩地点")
+    row4.append(stu_defence.defence_location)
+    table.rows[3].cells[1].merge(table.rows[3].cells[3])
+    for cell, align, ele in zip(table.rows[3].cells, (align_clcl * 2)[:6], row4):
+        cell.paragraphs[0].paragraph_format.alignment = align
+        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        cell.paragraphs[0].add_run(ele)
+
+    row5 = []  # 第5行的元素值用列表存储
+    row5.append("答辩组成员")
+    row5.append('')
+    row5.append('')
+    row5.append('')
+    row5.append('')
+    inst_tmp = [stu_defence.def_inst1, stu_defence.def_inst2, stu_defence.def_inst3, stu_defence.def_inst4, stu_defence.def_inst5]
+    inst_list = []
+    inst_group = ''
+    for i in inst_tmp:
+        if i != 'nan':
+            inst_list.append(i)
+            inst_group = inst_group + i + "、"
+    row5.append(inst_group.strip('、'))
+    table.rows[4].cells[1].merge(table.rows[4].cells[5])
+    for cell, align, ele in zip(table.rows[4].cells, (align_clcl * 2)[:6], row5):
+        cell.paragraphs[0].paragraph_format.alignment = align
+        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        cell.paragraphs[0].add_run(ele)
+    for i in range(5):
         table.rows[i].height = Cm(1)
+
+    table.rows[5].cells[0].merge(table.rows[5].cells[5])
+    table.rows[5].cells[0].paragraphs[0].add_run('一、学生网络答辩影像（附：答辩截屏图片或录屏文件）')
+    tmp6 = table.rows[5].cells[0].add_paragraph().add_run()
+    tmp6.add_picture(f'media/{stu_project.defence_image}', height=Cm(7))
+    table.rows[5].cells[0].add_paragraph()
+    table.rows[5].cells[0].add_paragraph('二、学生自述内容')
+    table.rows[5].cells[0].add_paragraph(stu_project.self_report)
+    table.rows[5].cells[0].add_paragraph()
+    table.rows[5].cells[0].add_paragraph('三、提问与问答')
+    table.rows[5].cells[0].add_paragraph(stu_project.quiz.replace('\r',''))
+
+    table.rows[6].cells[0].merge(table.rows[6].cells[2])
+    table.rows[6].cells[3].merge(table.rows[6].cells[5])
+    table.rows[6].cells[0].paragraphs[0].add_run('记录人（签字）：')
+    tmp7 = table.rows[6].cells[0].add_paragraph().add_run()
+    tmp7.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    table.rows[6].cells[0].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    table.rows[6].cells[0].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    table.rows[6].cells[3].paragraphs[0].add_run('答辩小组成员（签字）：')
+    tmp72 = table.rows[6].cells[3].add_paragraph().add_run()
+    for item in inst_list:
+# 获取对应老师的UserInfo对象，然后获取相应的签名保存地址
+        tmp72.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    table.rows[6].cells[3].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    table.rows[6].cells[3].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
     word.save(f'media/download_files/{word_name}')
     return word_name

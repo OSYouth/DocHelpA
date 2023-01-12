@@ -39,7 +39,7 @@ class AssignmentTemplateAdmin(admin.ModelAdmin):
     change_form_template = 'admin/graduate/assignmenttemplate/change_assignmenttemplate.html'
     list_display = ['instructor']
     readonly_fields = ['instruction', 'schdeule']
-    fields = ['instruction', 'cachet', 'para1', 'para2', 'para3', 'para4', 'para5', 'para6', 'task_require', 'step_way', 'schdeule', 'thought', 'result']
+    fields = ['instruction', 'cachet', 'para1', 'para2', 'para3', 'para4', 'para5', 'para6', 'task_require', 'step_way', 'schdeule', 'thought', 'result', 'comment', 'rws_date']
     def get_queryset(self, request):
         qs = super(AssignmentTemplateAdmin, self).get_queryset(request)
         if request.user.is_superuser:
@@ -106,7 +106,7 @@ def create_defence_info(dic):
     try:
         DefenceInfo.objects.create(stu=UserInfo.objects.get(username=dic.get('学号')), design_type=dic.get("毕业设计类型"),
                                    defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"),
-                                   ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'),
+                                   recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'),
                                    final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'),
                                    def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'),
                                    def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'))
