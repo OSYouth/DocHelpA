@@ -1,5 +1,7 @@
+import os, shutil
+
 from django.shortcuts import render
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from .models import *
 from user.models import UserInfo
 from docx import Document
@@ -16,10 +18,80 @@ import numpy as np
 def download(request):
     # 根据指导老师、时间，按学号创建文件夹，并对每个学生生成4个文件
     # 根据指导老师、时间，按文件名创建文件夹，并生成指导老师名下所有的学生的文件
-    # name = generate_zdjlb('201904040111', '00530')
+    # name = generate_zdjlb('201904040111')
+    # name = generate_dbjlb('201904040111', '00530')
     # name = generate_pyb('201904040111', '00530')
     name = generate_rws('201904040111', '00530')
     return render(request, 'upload_success.html', locals())
+
+def download_files(request, by):
+    # 请求账户所有文件保存的路径
+    f_path = f'media/download_files/{request.user.username+request.user.last_name+request.user.first_name}'
+    if not os.path.exists(f_path):
+        os.mkdir(f_path)
+    instructor_number = request.user.username
+    student_charge_set = GraduateProjectInfo.objects.filter(instructor=request.user.last_name+request.user.first_name)
+    if by == 'student_number':
+        # 存储此次所有文件 的文件夹的路径，名字不同以秒间隔开来，所以没有做路径是否存在的判断
+        filename = f'{request.user.last_name + request.user.first_name}（按学号创建）{pd.Timestamp.today().strftime("%Y%m%d%H%M%S")}'
+        downfile_path = f_path +"/" +  filename
+        os.mkdir(downfile_path)
+        for s in student_charge_set:
+            stu_file_path = downfile_path + f'/{s.stu.username+s.stu.last_name+s.stu.first_name}'
+            os.mkdir(stu_file_path)
+            generate_rws(  s.stu.username, instructor_number, stu_file_path)
+            generate_zdjlb(s.stu.username, instructor_number, stu_file_path)
+            generate_dbjlb(s.stu.username, instructor_number, stu_file_path)
+            generate_pyb(  s.stu.username, instructor_number, stu_file_path)
+        shutil.make_archive(f'{downfile_path }', 'zip', f'{downfile_path }')
+        response = FileResponse(file_iterator(f'{downfile_path}.zip'))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = f'attachment;filename={filename.encode("utf-8").decode("ISO-8859-1")}.zip'
+        return response
+    elif by == 'file_type':
+        # 存储此次所有文件 的文件夹的路径，名字不同以秒间隔开来，所以没有做路径是否存在的判断
+        filename = f'{request.user.last_name + request.user.first_name}（按文件创建）{pd.Timestamp.today().strftime("%Y%m%d%H%M%S")}'
+        downfile_path = f_path + "/" + filename
+        os.mkdir(downfile_path)
+
+        for s in student_charge_set:
+            rws_path = downfile_path + f'/0.毕业设计任务书'
+            if not os.path.exists(rws_path):
+                os.mkdir(rws_path)
+            generate_rws(  s.stu.username, instructor_number, rws_path)
+            zdjlb_path = downfile_path + f'/1.毕业设计指导记录表'
+            if not os.path.exists(zdjlb_path):
+                os.mkdir(zdjlb_path)
+            generate_zdjlb(s.stu.username, instructor_number, zdjlb_path)
+            pyb_path = downfile_path + f'/2.毕业设计评阅表'
+            if not os.path.exists(pyb_path):
+                os.mkdir(pyb_path)
+            generate_pyb(s.stu.username, instructor_number, pyb_path)
+            dbjlb_path = downfile_path + f'/3.毕业设计答辩记录表'
+            if not os.path.exists(dbjlb_path):
+                os.mkdir(dbjlb_path)
+            generate_dbjlb(s.stu.username, instructor_number, dbjlb_path)
+
+        shutil.make_archive(f'{downfile_path }', 'zip', f'{downfile_path }')
+        response = FileResponse(file_iterator(f'{downfile_path}.zip'))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = f'attachment;filename={filename.encode("utf-8").decode("ISO-8859-1")}.zip'
+        return response
+
+def file_iterator(file_path, chunk_size=512):
+    """
+    文件生成器,防止文件过大，导致内存溢出
+    :param file_path: 文件绝对路径
+    :param chunk_size: 块大小
+    :return: 生成器
+    """
+    with open(file_path, mode='rb') as f:
+        while True:
+            c = f.read(chunk_size)
+            if c:
+                yield c
+            else:
+                break
 
 def download_test(request, name):
     file = open(f'media/download_files/{name}', 'rb')
@@ -29,13 +101,13 @@ def download_test(request, name):
     return response
 
 # 生成毕业设计任务书
-def generate_rws(stu_no, inst_no):
+def generate_rws(stu_no, inst_no, path):
     stu = UserInfo.objects.get(username=stu_no)
     inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
     temp = AssignmentTemplate.objects.get(instructor=inst)
-    word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计答辩记录表.docx"
+    word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计任务书.docx"
     word = Document()
     # 先对于文档英文为Arial，中文为宋体所有字体设置为小四，所有字体设置为小四，
     word.styles['Normal'].font.name = 'Arial'
@@ -159,11 +231,11 @@ def generate_rws(stu_no, inst_no):
         for run in p.runs:
             run.font.size = Pt(10.5)
 
-    word.save(f'media/download_files/{word_name}')
+    word.save(f'{path}/{word_name}')
     return word_name
 
 # 生成毕业设计指导记录表
-def generate_zdjlb(stu_no):
+def generate_zdjlb(stu_no, inst_no, path):
     stu = UserInfo.objects.get(username=stu_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
@@ -317,12 +389,12 @@ def generate_zdjlb(stu_no):
         for run in p.runs:
             run.font.size = Pt(10.5)
 
-    word.save(f'media/download_files/{word_name}')
+    word.save(f'{path}/{word_name}')
     return word_name
 
 
 # 生成毕业设计评阅表
-def generate_pyb(stu_no, inst_no):
+def generate_pyb(stu_no, inst_no, path):
     stu = UserInfo.objects.get(username=stu_no)
     inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
@@ -475,12 +547,12 @@ def generate_pyb(stu_no, inst_no):
     for run in bz.runs:
         run.font.size = Pt(10.5)
 
-    word.save(f'media/download_files/{word_name}')
+    word.save(f'{path}/{word_name}')
     return word_name
 
 
 # 生成毕业设计答辩记录表
-def generate_dbjlb(stu_no, inst_no):
+def generate_dbjlb(stu_no, inst_no, path):
     stu = UserInfo.objects.get(username=stu_no)
     inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
@@ -599,5 +671,5 @@ def generate_dbjlb(stu_no, inst_no):
     table.rows[6].cells[3].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     table.rows[6].cells[3].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
-    word.save(f'media/download_files/{word_name}')
+    word.save(f'{path}/{word_name}')
     return word_name

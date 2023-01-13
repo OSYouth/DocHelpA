@@ -10,11 +10,12 @@
 {% block content %}{{ block.super }}
     <div class="template_download">
         {#如果用户名（UserInfor的username）长度小于12位，则判定不是学号，即用户不是学生，提供下载链接#}
-{#        注意length过滤器只是计算列表长度，如果不加make_list过滤器直接计算结果为0#}
+        {#        注意length过滤器只是计算列表长度，如果不加make_list过滤器直接计算结果为0#}
         {% if request.user|make_list|length < 10 %}
             <p style="color:red;">请确保所有步骤完成，信息完整之后再下载</p>
-            <a href="/static/学生毕业设计选题模板（用以创建学生用户）.xlsx">以学号分类</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-                    <a href="/static/学生毕业设计选题模板（用以创建学生用户）.xlsx">以文件类型分类</a>
+            <a href="/graduate/download_files/student_number">以学号分类</a>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            <a href="/graduate/download_files/file_type">以文件类型分类</a>
             <br>
         {% endif %}
     </div>
