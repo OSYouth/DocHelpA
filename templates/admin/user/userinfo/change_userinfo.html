@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% block extrastyle %}{{ block.super }}
+    <style>
+        .change_userinfo {
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}{{ block.super }}
+    <div class="change_userinfo">
+        <a href="/user/generate_vrcode">个人信息二维码</a>
+    </div>
+{% endblock %}

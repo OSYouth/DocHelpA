@@ -6,6 +6,7 @@ import numpy as np
 from django.shortcuts import render, redirect
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group, Permission
+import qrcode
 
 admin.site.site_header = '文档助手'
 admin.site.site_title = "文档自动生成 提高工作效率"
@@ -17,6 +18,7 @@ class UserInfoAdmin(admin.ModelAdmin):
     search_fields = ['username']
     readonly_fields = ['username']
     fields = ['username', ('last_name', 'first_name'), ('dept_name', 'major'),'title', ('phone', 'email'), 'sign']
+    change_form_template = 'admin/user/userinfo/change_userinfo.html'
     # 设置用户登录admin时只能看到自己录入的内容
     # https: // blog.csdn.net / xmy7007 / article / details / 122760597
     def get_queryset(self, request):

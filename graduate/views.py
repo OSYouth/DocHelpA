@@ -3,6 +3,7 @@ import os, shutil
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from .models import *
+from django.contrib.auth.decorators import login_required
 from user.models import UserInfo
 from docx import Document
 from docx.shared import Pt,Cm    #字号
@@ -24,6 +25,7 @@ def download(request):
     name = generate_rws('201904040111', '00530')
     return render(request, 'upload_success.html', locals())
 
+@login_required
 def download_files(request, by):
     # 请求账户所有文件保存的路径
     f_path = f'media/download_files/{request.user.username+request.user.last_name+request.user.first_name}'

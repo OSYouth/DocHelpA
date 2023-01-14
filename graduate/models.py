@@ -16,10 +16,11 @@ class TopicBatch(models.Model):
 class AssignmentTemplate(models.Model):
     instruction = models.TextField('说明', max_length=300,
                                    default='''本页面提供毕业设计任务书模板的维护和学院公章的添加\n
-                                           参考毕业设计任务书，在“一、毕业设计目标”需要替换关键字\n
-                                           替换关键字由学生填写，设计留有最多5个关键字\n
-                                           教师填写关键字前后的文本即可，空文本以“*”代替，无需修改\n
-                                           可以下载本页底部的“毕业设计任务书模板.doc”参考
+                                           毕业设计任务书中“一、毕业设计目标”一般会随论文主题不同而无法统一\n
+                                           因此在“一、毕业设计目标”提供支持替换部分关键内容的功能\n
+                                           为减少负担，设计“一、毕业设计目标”的模板在教师维护后，替换部分由学生在第6步填写，教师可以修改和填写\n
+                                           替换部分以{}表示，最多支持5个，请确保替换部分顺序一致\n
+                                           默认显示以大数据技术专业为例
                                            ''')
     cachet = models.ImageField('学院公章', upload_to='cachet_img/')
     para1 = models.TextField('文本1', default='*')

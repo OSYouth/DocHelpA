@@ -3,7 +3,8 @@ from .models import UserInfo
 import pandas as pd
 import numpy as np
 from django.db.utils import IntegrityError
-
+from django.http import HttpResponse, FileResponse, StreamingHttpResponse
+import qrcode
 
 # Create your views here.
 # 创建单个用户
@@ -37,3 +38,32 @@ def batch_create_user(request):
 
 def upload_error(request):
     return render(request, 'upload_error.html')
+
+def generate_vrcode(request):
+    vstr = f'''
+    BEGIN:VCARD
+    VERSION:4.0
+    N:{request.user.last_name}
+    FN:{request.user.first_name}
+    TITLE:{request.user.title}
+    ORG:湖南商务职业技术学院{request.user.dept_name}
+    TEL;CELL:(+86){request.user.phone}
+    EMAIL;PREF;INTERNET:{request.user.email}
+    END:VCARD
+    '''
+
+    qr = qrcode.QRCode(
+        version=3,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=5,
+        border=4,
+    )
+    qr.add_data(vstr)
+    qr.make(fit=True)
+    img = qr.make_image()
+    img.save(f'media/instructor_info/{request.user.last_name+request.user.first_name}.jpg')
+    file = open(f'media/instructor_info/{request.user.last_name+request.user.first_name}.jpg', 'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = f'attachment;filename={(request.user.last_name+request.user.first_name).encode("utf-8").decode("ISO-8859-1")}.jpg'
+    return response
