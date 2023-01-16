@@ -27,6 +27,8 @@ def download(request):
 
 @login_required
 def download_files(request, by):
+    if not os.path.exists(f'media/download_files'):
+        os.mkdir(f'media/download_files')
     # 请求账户所有文件保存的路径
     f_path = f'media/download_files/{request.user.username+request.user.last_name+request.user.first_name}'
     if not os.path.exists(f_path):

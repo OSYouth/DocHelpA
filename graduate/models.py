@@ -18,17 +18,12 @@ class AssignmentTemplate(models.Model):
                                    default='''本页面提供毕业设计任务书模板的维护和学院公章的添加\n
                                            毕业设计任务书中“一、毕业设计目标”一般会随论文主题不同而无法统一\n
                                            因此在“一、毕业设计目标”提供支持替换部分关键内容的功能\n
-                                           为减少负担，设计“一、毕业设计目标”的模板在教师维护后，替换部分由学生在第6步填写，教师可以修改和填写\n
+                                           为减少负担，设计“一、毕业设计目标”的模板在教师维护后，替换部分可由学生在第6步填写，教师可以修改和填写\n
                                            替换部分以{}表示，最多支持5个，请确保替换部分顺序一致\n
-                                           默认显示以大数据技术专业为例
+                                           毕业设计任务书模板默认以大数据技术专业为例显示
                                            ''')
     cachet = models.ImageField('学院公章', upload_to='cachet_img/')
-    para1 = models.TextField('文本1', default='*')
-    para2 = models.TextField('文本2', default='*')
-    para3 = models.TextField('文本3', default='*')
-    para4 = models.TextField('文本4', default='*')
-    para5 = models.TextField('文本5', default='*')
-    para6 = models.TextField('文本6', default='*')
+    goal = models.TextField('一、毕业设计目标', default='设计的目的在于考察学生利用大数据技术与应用专业知识进行大数据项目数据采集、处理及分析展示的能力。在指导教师的指导下，根据选择的毕业设计课题，获取{}的相关数据，利用大数据专业知识进行数据分析，并使用数据可视化技术对数据进行展示，为{}')
     task_require = models.TextField('二、毕业设计任务及要求')
     step_way = models.TextField('三、毕业设计实施步骤和方法')
     schdeule = models.TextField('四、毕业设计进程安排',
@@ -46,12 +41,11 @@ class AssignmentTemplate(models.Model):
     instructor = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = "3.毕业设计任务书模板"
+        verbose_name = "3.毕业设计任务书模板（如果只有一种模板，建议直接点击修改）"
         verbose_name_plural = verbose_name
 
         def __str__(self):
             return self.last_name + self.first_name
-
 
 # 4. 毕业设计指导记录表模板
 class GuideRecordTemplate(models.Model):
@@ -93,12 +87,12 @@ class GuideRecordTemplate(models.Model):
         verbose_name_plural = verbose_name
 
 
-# 5.答辩安排信息表上传
+# 5.答辩安排信息文件上传
 class DefenceBatch(models.Model):
-    defence_file = models.FileField("学生毕业答辩安排文件", upload_to="defence_info/")
+    defence_file = models.FileField("学生毕业答辩信息文件", upload_to="defence_info/")
 
     class Meta:
-        verbose_name = "5.学生毕业答辩安排文件上传"
+        verbose_name = "5.学生毕业答辩信息文件上传"
         verbose_name_plural = verbose_name
 
 
@@ -116,6 +110,7 @@ class DefenceInfo(models.Model):
     def_inst3 = models.CharField('答辩教师3', max_length=30, default='*')
     def_inst4 = models.CharField('答辩教师4', max_length=30, default='*')
     def_inst5 = models.CharField('答辩教师5', max_length=30, default='*')
+    assignment_template_id = models.CharField('任务书模板ID',  max_length=30, default='')
 
 # 6.毕业设计信息完善
 class GraduateProjectInfo(models.Model):
@@ -134,7 +129,6 @@ class GraduateProjectInfo(models.Model):
     self_report = models.TextField("学生自述内容")
     quiz = models.TextField("提问与回答")
     stu = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
-    # instructor = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
     instructor = models.CharField('指导教师', max_length=30, default='')
 
     class Meta:

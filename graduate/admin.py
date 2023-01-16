@@ -37,16 +37,31 @@ class TopicBatchAdmin(admin.ModelAdmin):
 @admin.register(AssignmentTemplate)
 class AssignmentTemplateAdmin(admin.ModelAdmin):
     change_form_template = 'admin/graduate/assignmenttemplate/change_assignmenttemplate.html'
-    list_display = ['instructor']
+    list_display = ['id','instruction']
     readonly_fields = ['instruction', 'schdeule']
-    fields = ['instruction', 'cachet', 'para1', 'para2', 'para3', 'para4', 'para5', 'para6', 'task_require', 'step_way', 'schdeule', 'thought', 'result', 'comment', 'rws_date']
+    fields = ['instruction', 'cachet', 'goal', 'task_require', 'step_way', 'schdeule', 'thought', 'result', 'comment', 'rws_date', 'instructor']
     def get_queryset(self, request):
         qs = super(AssignmentTemplateAdmin, self).get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(instructor__username=request.user)
 
-# 4.答辩安排信息表上传
+    def get_changeform_initial_data(self, request):
+        return {'instructor': request.user}
+
+# 4.毕业设计指导记录表模板维护
+@admin.register(GuideRecordTemplate)
+class GuideRecordTemplateAdmin(admin.ModelAdmin):
+    list_display = ['instructor']
+    readonly_fields = ['instruction']
+    fields = ['instructor', 'guide_cont1', 'guide_date1', 'guide_loca1', 'guide_proc1', 'guide_cont2', 'guide_date2', 'guide_loca2', 'guide_proc2', 'guide_cont3', 'guide_date3', 'guide_loca3', 'guide_proc3', 'guide_cont4', 'guide_date4', 'guide_loca4', 'guide_proc4', 'guide_cont5', 'guide_date5', 'guide_loca5', 'guide_proc5', 'guide_cont6', 'guide_date6', 'guide_loca6', 'guide_proc6']
+    def get_queryset(self, request):
+        qs = super(GuideRecordTemplateAdmin, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(instructor__username=request.user)
+
+# 5.答辩安排信息表上传
 @admin.register(DefenceBatch)
 class DefenceBatchAdmin(admin.ModelAdmin):
     list_display = ['defence_file']
@@ -63,11 +78,13 @@ class DefenceBatchAdmin(admin.ModelAdmin):
             extra_context = '上传成功'
         return self.changeform_view(request, None, form_url, extra_context)
 
-# 5.毕业设计信息完善（还有关键词要填）
+# 6.毕业设计信息完善（还有关键词要填）
 @admin.register(GraduateProjectInfo)
 class GraduateProjectInfoAdmin(admin.ModelAdmin):
     change_list_template = 'admin/graduate/graduateprojectinfo/info_list.html'
-    list_display = ['stu', 'class_name', 'topic','instructor']
+    list_display = ['stu', 'class_name', 'dean', 'director', 'instructor', 'topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
+    list_editable = ['topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'self_report', 'quiz']
+    # list_display_links = ['stu']
     fields = ['topic', ('class_name', 'stu'), ('dean', 'director', 'instructor'), 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
     readonly_fields = [ 'class_name', 'instructor', 'stu']
     def get_queryset(self, request):
@@ -78,18 +95,6 @@ class GraduateProjectInfoAdmin(admin.ModelAdmin):
             return qs.filter(instructor = (request.user.last_name+request.user.first_name))
         return qs.filter(stu=request.user)
 
-# 毕业设计指导记录表模板维护
-@admin.register(GuideRecordTemplate)
-class GuideRecordTemplateAdmin(admin.ModelAdmin):
-    list_display = ['instructor']
-    readonly_fields = ['instruction']
-    fields = ['instructor', 'guide_cont1', 'guide_date1', 'guide_loca1', 'guide_proc1', 'guide_cont2', 'guide_date2', 'guide_loca2', 'guide_proc2', 'guide_cont3', 'guide_date3', 'guide_loca3', 'guide_proc3', 'guide_cont4', 'guide_date4', 'guide_loca4', 'guide_proc4', 'guide_cont5', 'guide_date5', 'guide_loca5', 'guide_proc5', 'guide_cont6', 'guide_date6', 'guide_loca6', 'guide_proc6']
-    def get_queryset(self, request):
-        qs = super(GuideRecordTemplate, self).get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(instructor__username=request.user)
-
 # 通过选题信息表格 创建单个学生用户，并在GraduateProjectInfo中添加相应信息
 def create_student(group, dic):
     try:
@@ -99,6 +104,7 @@ def create_student(group, dic):
         group.user_set.add(stu.id)
         GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'),
                                            class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
+
     except IntegrityError:  # 重复键值
         pass
 
@@ -109,7 +115,7 @@ def create_defence_info(dic):
                                    recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'),
                                    final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'),
                                    def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'),
-                                   def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'))
+                                   def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
     except IntegrityError:  # 重复键值
         pass
 

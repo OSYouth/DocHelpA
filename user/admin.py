@@ -46,6 +46,7 @@ class InstructorBatchAdmin(admin.ModelAdmin):
                 change_userinfo = Permission.objects.get(codename='change_userinfo')
                 change_assignmenttemplate = Permission.objects.get(codename='change_assignmenttemplate')
                 view_assignmenttemplate = Permission.objects.get(codename='view_assignmenttemplate')
+                add_assignmenttemplate = Permission.objects.get(codename='add_assignmenttemplate')
                 change_guiderecordtemplate = Permission.objects.get(codename='change_guiderecordtemplate')
                 view_guiderecordtemplate = Permission.objects.get(codename='view_guiderecordtemplate')
                 add_topicbatch = Permission.objects.get(codename='add_topicbatch')
@@ -53,7 +54,7 @@ class InstructorBatchAdmin(admin.ModelAdmin):
                 view_graduateprojectinfo = Permission.objects.get(codename='view_graduateprojectinfo')
                 change_graduateprojectinfo = Permission.objects.get(codename='change_graduateprojectinfo')
                 group = Group.objects.create(name="教师")
-                group.permissions.set([view_userinfo, change_userinfo, change_assignmenttemplate, view_assignmenttemplate, change_guiderecordtemplate, view_guiderecordtemplate, add_topicbatch, add_defencebatch, view_graduateprojectinfo, change_graduateprojectinfo])
+                group.permissions.set([view_userinfo, change_userinfo, change_assignmenttemplate, view_assignmenttemplate,add_assignmenttemplate, change_guiderecordtemplate, view_guiderecordtemplate, add_topicbatch, add_defencebatch, view_graduateprojectinfo, change_graduateprojectinfo])
             for i in range(user_data[pd.notnull(user_data['工号'])].shape[0]):
                 create_instructor(group, user_data[pd.notnull(user_data['工号'])].iloc[i].to_dict())
             # print(user_data)
@@ -68,5 +69,6 @@ def create_instructor(group, dic):
                                          ID_num=dic.get('身份证号码'), is_staff=1)
         group.user_set.add(instructor.id)
         AssignmentTemplate.objects.create(instructor=instructor)
+        GuideRecordTemplate.objects.create(instructor=instructor)
     except IntegrityError:  # 重复键值
         pass
