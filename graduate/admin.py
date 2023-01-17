@@ -104,7 +104,6 @@ def create_student(group, dic):
                                            is_staff=1, major=dic.get('专业'))
         group.user_set.add(stu.id)
         GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'), class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
-
     except IntegrityError:  # 重复键值
         pass
 

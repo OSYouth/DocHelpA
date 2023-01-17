@@ -206,7 +206,11 @@ def generate_rws(stu_no, inst_no, path):
     table2.rows[0].cells[0].paragraphs[0].add_run('指导教师意见')
     table2.rows[0].cells[1].add_paragraph().add_run(temp.comment)
     p10 = table2.rows[0].cells[1].add_paragraph('签字：')
-    p10.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    try:
+        p10.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    except Exception:
+        p10.add_run().add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        p10.add_run(inst.last_name + inst.first_name + "信息不完整，请完善信息")
     p10.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table2.rows[0].cells[1].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
@@ -222,7 +226,6 @@ def generate_rws(stu_no, inst_no, path):
     except Exception:
         p11_1.add_run().add_picture(f'static/缺失.jpeg', width=Cm(1.8))
         p11_1.add_run(director.last_name + director.first_name + "信息不完整，请联系其完善信息")
-
     p11_1.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table2.rows[1].cells[1].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table2.rows[1].cells[7].paragraphs[0].add_run('学院审批意见')
@@ -258,9 +261,11 @@ def generate_rws(stu_no, inst_no, path):
 
 # 生成毕业设计指导记录表
 def generate_zdjlb(stu_no, inst_no, path):
+    inst = UserInfo.objects.get(username=inst_no)
     stu = UserInfo.objects.get(username=stu_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
+    grtemp = GuideRecordTemplate.objects.get(instructor=inst)
     word_name =stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计指导记录表.docx"
     word = Document()
     # 先对于文档英文为Arial，中文为宋体所有字体设置为小四，所有字体设置为小四，
@@ -319,6 +324,8 @@ def generate_zdjlb(stu_no, inst_no, path):
     for i in range(8):
         table2.rows[i].cells[3].merge(table2.rows[i].cells[4])
         table2.rows[i].height = Cm(1)
+    # 合并作为毕业设计过程的单元格
+    table2.rows[3].cells[0].merge(table2.rows[6].cells[0])
     row4 = []  # 第4行的元素值用列表存储    默认第5个元素和第4个一样，不做处理
     row4.append("指导内容")
     row4.append('指导时间')
@@ -335,67 +342,24 @@ def generate_zdjlb(stu_no, inst_no, path):
 # 从这一行开始后面的6行可以用for循环结合数据库进行遍历
     # 在进入程序开始需要引入老师的信息以调用指导记录表的模板信息
     # 还需要注意日期的年份要在程序里面重新获取，以免模板在教师修改后，年份写死了
-    row5 = []  # 第5行的元素值用列表存储    默认第5个元素和第4个一样，不做处理
-    row5.append("毕业设计选题")
-    row5.append(f'{time.localtime().tm_year-1}年11月23日')
-    row5.append('网络通信工具')
-    row5.append("指导学生选题，讲解选题需要完成的工作内容，并下发毕业设计指南及模板")
-    for cell, align, ele in zip(table2.rows[1].cells[:4], align_clcl, row5):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
-    row6 = []  # 第6行的元素值用列表存储    默认第5个元素和第4个一样，不做处理
-    row6.append("毕业设计工作计划")
-    row6.append(f'{time.localtime().tm_year-1}年11月30日')
-    row6.append('网络通信工具')
-    row6.append("下发毕业设计任务书，并指导学生制定毕业设计工作计划")
-    align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
-    for cell, align, ele in zip(table2.rows[2].cells[:4], align_clcl, row6):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
-    # 合并作为毕业设计过程的单元格
-    table2.rows[3].cells[0].merge(table2.rows[6].cells[0])
-    row7 = []  # 第7行的元素值用列表存储    默认第5个元素和第4个一样，不做处理
-    row7.append("毕业设计过程")
-    row7.append(f'{time.localtime().tm_year}年2月28日')
-    row7.append('网络通信工具')
-    row7.append("上交初稿，指导老师审核初稿并提出修改意见，学生按照意见修改初稿。")
-    align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
-    for cell, align, ele in zip(table2.rows[3].cells[:4], align_clcl, row7):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
-    row8 = []  # 第8行的元素值用列表存储    第1列置空，默认第5个元素和第4个一样，不做处理
-    row8.append(f'{time.localtime().tm_year}年3月30日')
-    row8.append('网络通信工具')
-    row8.append("在初稿的基础上根据指导老师意见进行完善，上交第一次修改稿，老师审核后提出改进意见，并按照修改意见进行完善。")
-    align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
-    for cell, align, ele in zip(table2.rows[4].cells[1:4], align_clcl[1:], row8):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
-    row9 = []  # 第9行的元素值用列表存储    第1列置空，默认第5个元素和第4个一样，不做处理
-    row9.append(f'{time.localtime().tm_year}年5月1日')
-    row9.append('网络通信工具')
-    row9.append("在第一次修改稿的基础上进行完善，上交第二次修改稿，老师审核提出完善意见，并按照意见进行修改")
-    align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
-    for cell, align, ele in zip(table2.rows[5].cells[1:4], align_clcl[1:], row9):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
-    row10 = []  # 第10行的元素值用列表存储    第1列置空，默认第5个元素和第4个一样，不做处理
-    row10.append(f'{time.localtime().tm_year}年5月10日')
-    row10.append('网络通信工具')
-    row10.append("对毕业设计文档内容及格式进行完善，并进行查重，上交最终稿。")
-    align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
-    for cell, align, ele in zip(table2.rows[6].cells[1:4], align_clcl[1:], row10):
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        cell.paragraphs[0].paragraph_format.alignment = align
-        cell.paragraphs[0].add_run(ele)
+    row5to10 = [ grtemp.guide_cont1, grtemp.guide_date1, grtemp.guide_loca1, grtemp.guide_proc1, grtemp.guide_cont2, grtemp.guide_date2, grtemp.guide_loca2, grtemp.guide_proc2, grtemp.guide_cont3, grtemp.guide_date3, grtemp.guide_loca3, grtemp.guide_proc3, grtemp.guide_cont3_2, grtemp.guide_date3_2, grtemp.guide_loca3_2, grtemp.guide_proc3_2, grtemp.guide_cont3_3, grtemp.guide_date3_3, grtemp.guide_loca3_3, grtemp.guide_proc3_3, grtemp.guide_cont3_4, grtemp.guide_date3_4, grtemp.guide_loca3_4, grtemp.guide_proc3_4]
+    for i in range(6):
+        for cell, align, ele in zip(table2.rows[i+1].cells[:4], align_clcl, np.array(row5to10).reshape(6,4)[i]):
+            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            cell.paragraphs[0].paragraph_format.alignment = align
+            try:
+                d = time.strptime(ele, '%Y年%m月%d日')
+                # 月份大过8则年份肯定是上一年
+                if d.tm_mon > 8:
+                    cell.paragraphs[0].add_run(f'{time.localtime().tm_year-1}年{d.tm_mon}月{d.tm_mday}日')
+                else:
+                    cell.paragraphs[0].add_run(f'{time.localtime().tm_year}年{d.tm_mon}月{d.tm_mday}日')
+            except Exception:
+                cell.paragraphs[0].add_run(ele)
+
     row11 = []  # 第11行的元素值用列表存储    第1列置空，默认第5个元素和第4个一样，不做处理
     row11.append('毕业设计答辩')
-    row11.append(f'{time.localtime().tm_year}年5月15日')
+    row11.append(stu_defence.defence_date)
     row11.append('线上')
     row11.append("答辩")
     align_clcl = [WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT]
@@ -407,7 +371,9 @@ def generate_zdjlb(stu_no, inst_no, path):
     bz1 = word.add_paragraph('注：1. 设计类型包括产品设计、流程设计或方案设计。')
     bz2 = word.add_paragraph('       2. 毕业设计过程部分，指导教师可根据实际情况自行增加或删除行。')
     for p in [bz1, bz2]:
+        p.line_spacing_rule = WD_LINE_SPACING.EXACTLY
         p.paragraph_format.line_spacing = Pt(12)
+        p.paragraph_format.space_after = Pt(0)
         for run in p.runs:
             run.font.size = Pt(10.5)
 
@@ -523,7 +489,11 @@ def generate_pyb(stu_no, inst_no, path):
     row5_2.add_run('文档撰写规范，方案设计完善，格式符合要求，同意答辩。\n')
     row5_3 = table.rows[4].cells[0].add_paragraph('')
     tmp5 = row5_3.add_run(' 指导老师签名：')
-    tmp5.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    try:
+        tmp5.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    except Exception:
+        tmp5.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        tmp5.add_run(inst.last_name + inst.first_name + "信息不完整，请完善信息")
     # row5_3.paragraph_format.first_line_indent = Pt(150)
     row5_3.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     tmp_day = pd.to_datetime(stu_defence.defence_date, format='%Y年%m月%d日')-pd.tseries.offsets.DateOffset(days=1)
@@ -537,11 +507,16 @@ def generate_pyb(stu_no, inst_no, path):
     row6_2.add_run('问题回答准确，条理清晰，答辩通过。\n')
     row6_3 = table.rows[5].cells[0].add_paragraph('')
     tmp6 = row6_3.add_run('答辩组老师（三人以上）签名：')
-# 签名要对答辩的老师进行遍历
-    tmp6.add_picture(f'media/{inst.sign}', width=Cm(1.8))
-    tmp6.add_picture(f'media/{inst.sign}', width=Cm(1.8))
-    tmp6.add_picture(f'media/{inst.sign}', width=Cm(1.8))
-    tmp6.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    inst_tmp = [stu_defence.def_inst1, stu_defence.def_inst2, stu_defence.def_inst3, stu_defence.def_inst4, stu_defence.def_inst5]
+    for i in inst_tmp:
+        # 如果def_inst * 第一个元素（即姓氏）都无法在UserInfo里面找到，则不需要处理
+        if len(UserInfo.objects.filter(last_name=i[0])) > 0:
+            try:
+                tmp_inst = UserInfo.objects.get(last_name=i[0], first_name=i[1:])
+                tmp6.add_picture(f'media/{tmp_inst.sign}', width=Cm(1.8))
+            except Exception:
+                tmp6.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+                tmp6.add_text(tmp_inst.last_name + tmp_inst.first_name + "信息不完整，请联系其完善信息")
     row6_3.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     row6_4 = table.rows[5].cells[0].add_paragraph(stu_defence.defence_date)
     row6_4.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -571,7 +546,6 @@ def generate_pyb(stu_no, inst_no, path):
 
     word.save(f'{path}/{word_name}')
     return word_name
-
 
 # 生成毕业设计答辩记录表
 def generate_dbjlb(stu_no, inst_no, path):
@@ -670,8 +644,11 @@ def generate_dbjlb(stu_no, inst_no, path):
     table.rows[5].cells[0].merge(table.rows[5].cells[5])
     table.rows[5].cells[0].paragraphs[0].add_run('一、学生网络答辩影像（附：答辩截屏图片或录屏文件）')
     tmp6 = table.rows[5].cells[0].add_paragraph().add_run()
-    # tmp6.add_picture(f'media/{stu_project.defence_image}', height=Cm(7))
-    tmp6.add_picture(f'media/{inst.sign}', height=Cm(7))
+    try:
+        tmp6.add_picture(f'media/{stu_project.defence_image}', height=Cm(7))
+    except Exception:
+        tmp6.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        tmp6.add_text("答辩影像未上传，请完善信息")
     table.rows[5].cells[0].add_paragraph()
     table.rows[5].cells[0].add_paragraph('二、学生自述内容')
     table.rows[5].cells[0].add_paragraph(stu_project.self_report)
@@ -683,14 +660,24 @@ def generate_dbjlb(stu_no, inst_no, path):
     table.rows[6].cells[3].merge(table.rows[6].cells[5])
     table.rows[6].cells[0].paragraphs[0].add_run('记录人（签字）：')
     tmp7 = table.rows[6].cells[0].add_paragraph().add_run()
-    tmp7.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    try:
+        recorder = UserInfo.objects.get(last_name=stu_defence.recorder[0], first_name=stu_defence.recorder[1:])
+        tmp7.add_picture(f'media/{recorder.sign}', width=Cm(1.8))
+    except Exception:
+        tmp7.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        tmp7.add_text("答辩影像未上传，请完善信息")
     table.rows[6].cells[0].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     table.rows[6].cells[0].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table.rows[6].cells[3].paragraphs[0].add_run('答辩小组成员（签字）：')
     tmp72 = table.rows[6].cells[3].add_paragraph().add_run()
     for item in inst_list:
 # 获取对应老师的UserInfo对象，然后获取相应的签名保存地址
-        tmp72.add_picture(f'media/{inst.sign}', width=Cm(1.8))
+        try:
+            temp_inst = UserInfo.objects.get(last_name=item[0], first_name=item[1:])
+            tmp72.add_picture(f'media/{temp_inst.sign}', width=Cm(1.8))
+        except Exception:
+            tmp72.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+            tmp72.add_text(temp_inst.last_name + temp_inst.first_name + "信息不完整，请联系其完善信息")
     table.rows[6].cells[3].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     table.rows[6].cells[3].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
