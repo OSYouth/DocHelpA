@@ -36,6 +36,7 @@ class TopicBatchAdmin(admin.ModelAdmin):
 # 3.毕业设计任务书模板设定
 @admin.register(AssignmentTemplate)
 class AssignmentTemplateAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/graduate/assignmenttemplate/assignment_template_list.html'
     change_form_template = 'admin/graduate/assignmenttemplate/change_assignmenttemplate.html'
     list_display = ['id','instruction']
     readonly_fields = ['instruction', 'schdeule']
@@ -52,9 +53,9 @@ class AssignmentTemplateAdmin(admin.ModelAdmin):
 # 4.毕业设计指导记录表模板维护
 @admin.register(GuideRecordTemplate)
 class GuideRecordTemplateAdmin(admin.ModelAdmin):
-    list_display = ['instructor']
+    list_display = ['instructor', 'instruction']
     readonly_fields = ['instruction']
-    fields = ['instructor', 'guide_cont1', 'guide_date1', 'guide_loca1', 'guide_proc1', 'guide_cont2', 'guide_date2', 'guide_loca2', 'guide_proc2', 'guide_cont3', 'guide_date3', 'guide_loca3', 'guide_proc3', 'guide_cont4', 'guide_date4', 'guide_loca4', 'guide_proc4', 'guide_cont5', 'guide_date5', 'guide_loca5', 'guide_proc5', 'guide_cont6', 'guide_date6', 'guide_loca6', 'guide_proc6']
+    fields = ['instruction', ('guide_cont1', 'guide_date1', 'guide_loca1', 'guide_proc1'), ('guide_cont2', 'guide_date2', 'guide_loca2', 'guide_proc2'), ('guide_cont3', 'guide_date3', 'guide_loca3', 'guide_proc3', 'guide_date3_2', 'guide_loca3_2', 'guide_proc3_2',  'guide_date3_3', 'guide_loca3_3', 'guide_proc3_3', 'guide_date3_4', 'guide_loca3_4', 'guide_proc3_4')]
     def get_queryset(self, request):
         qs = super(GuideRecordTemplateAdmin, self).get_queryset(request)
         if request.user.is_superuser:
@@ -102,20 +103,14 @@ def create_student(group, dic):
                                            last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'),
                                            is_staff=1, major=dic.get('专业'))
         group.user_set.add(stu.id)
-        GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'),
-                                           class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
+        GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'), class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
 
     except IntegrityError:  # 重复键值
         pass
 
 def create_defence_info(dic):
     try:
-        DefenceInfo.objects.create(stu=UserInfo.objects.get(username=dic.get('学号')), design_type=dic.get("毕业设计类型"),
-                                   defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"),
-                                   recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'),
-                                   final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'),
-                                   def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'),
-                                   def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
+        DefenceInfo.objects.update_or_create(stu=UserInfo.objects.get(username=dic.get('学号')), design_type=dic.get("毕业设计类型"), defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"), recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'), final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'), def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'), def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
     except IntegrityError:  # 重复键值
         pass
 

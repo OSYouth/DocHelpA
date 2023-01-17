@@ -110,7 +110,12 @@ def generate_rws(stu_no, inst_no, path):
     inst = UserInfo.objects.get(username=inst_no)
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
-    temp = AssignmentTemplate.objects.get(instructor=inst)
+    temp_set = AssignmentTemplate.objects.filter(instructor=inst)
+    temp = temp_set[0]
+    temp_set_id_list = list(AssignmentTemplate.objects.filter(instructor=inst).values_list('id', flat=True))
+    # 判断学生答辩信息中模板id是否在  获取所有模板的ID列表 中
+    if stu_defence.assignment_template_id in list(map(str,temp_set_id_list)):
+        temp = temp_set.get(id=stu_defence.assignment_template_id)
     word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计任务书.docx"
     word = Document()
     # 先对于文档英文为Arial，中文为宋体所有字体设置为小四，所有字体设置为小四，
@@ -167,8 +172,10 @@ def generate_rws(stu_no, inst_no, path):
     for i in range(3,9):
         table.rows[i].cells[0].merge(table.rows[i].cells[5])
     table.rows[3].cells[0].paragraphs[0].add_run('一、毕业设计目标')
-    design_object = temp.para1+stu_project.key_word1+temp.para2+stu_project.key_word2+temp.para3+stu_project.key_word3+temp.para4+stu_project.key_word4+temp.para5+stu_project.key_word5+temp.para6
-    table.rows[3].cells[0].add_paragraph().add_run('\t'+design_object.strip('*'))
+    keyword_length = temp.goal.count("*")
+    keyword_list = [stu_project.key_word1, stu_project.key_word2, stu_project.key_word3, stu_project.key_word4, stu_project.key_word5]
+    design_object = temp.goal.replace("*","%s")%tuple(keyword_list[:keyword_length])
+    table.rows[3].cells[0].add_paragraph().add_run('\t'+design_object)
 
     table.rows[4].cells[0].paragraphs[0].add_run('二、毕业设计任务及要求')
     table.rows[4].cells[0].add_paragraph().add_run('\t'+temp.task_require.replace('\r\n','\n\t'))
@@ -185,7 +192,7 @@ def generate_rws(stu_no, inst_no, path):
     table.rows[8].cells[0].paragraphs[0].add_run('六、成果表现形式')
     table.rows[8].cells[0].add_paragraph().add_run('\t'+temp.result.replace('\r\n','\n\t'))
 
-    # 保证table格式里面的行高至少为1cm
+    # 保证前面创建的table格式里面的行高至少为1cm
     for i in range(9):
         table.rows[i].height = Cm(1)
         for cell in table.rows[i].cells:
@@ -209,7 +216,13 @@ def generate_rws(stu_no, inst_no, path):
     table2.rows[1].cells[1].add_paragraph('      同意实施')
     table2.rows[1].cells[1].add_paragraph()
     p11_1 = table2.rows[1].cells[1].add_paragraph('签字：')
-    p11_1.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.8))
+    try:
+        director = UserInfo.objects.get(last_name=stu_project.director[0], first_name=stu_project.director[1:])
+        p11_1.add_run().add_picture(f'media/{director.sign}', width=Cm(1.8))
+    except Exception:
+        p11_1.add_run().add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        p11_1.add_run(director.last_name + director.first_name + "信息不完整，请联系其完善信息")
+
     p11_1.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table2.rows[1].cells[1].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table2.rows[1].cells[7].paragraphs[0].add_run('学院审批意见')
@@ -218,7 +231,12 @@ def generate_rws(stu_no, inst_no, path):
     table2.rows[1].cells[8].add_paragraph()
     p11_2 = table2.rows[1].cells[8].add_paragraph('签字：')
     p11_2.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p11_2.add_run().add_picture(f'media/{inst.sign}', width=Cm(1.5))
+    try:
+        dean = UserInfo.objects.get(last_name=stu_project.dean[0], first_name=stu_project.dean[1:])
+        p11_2.add_run().add_picture(f'media/{dean.sign}', width=Cm(1.8))
+    except Exception:
+        p11_2.add_run().add_picture(f'static/缺失.jpeg', width=Cm(1.8))
+        p11_2.add_run(dean.last_name + dean.first_name + "信息不完整，请联系其完善信息")
     # p11_2.add_run().add_picture(f'media/{temp.cachet}', width=Cm(4))
     table2.rows[1].cells[8].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
@@ -652,7 +670,8 @@ def generate_dbjlb(stu_no, inst_no, path):
     table.rows[5].cells[0].merge(table.rows[5].cells[5])
     table.rows[5].cells[0].paragraphs[0].add_run('一、学生网络答辩影像（附：答辩截屏图片或录屏文件）')
     tmp6 = table.rows[5].cells[0].add_paragraph().add_run()
-    tmp6.add_picture(f'media/{stu_project.defence_image}', height=Cm(7))
+    # tmp6.add_picture(f'media/{stu_project.defence_image}', height=Cm(7))
+    tmp6.add_picture(f'media/{inst.sign}', height=Cm(7))
     table.rows[5].cells[0].add_paragraph()
     table.rows[5].cells[0].add_paragraph('二、学生自述内容')
     table.rows[5].cells[0].add_paragraph(stu_project.self_report)

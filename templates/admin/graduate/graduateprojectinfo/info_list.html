@@ -1,14 +1,14 @@
 {% extends "admin/change_list.html" %}
 {% block extrastyle %}{{ block.super }}
     <style>
-        .template_download {
+        .graduate_project_info_list {
             margin: auto;
             text-align: center;
         }
     </style>
 {% endblock %}
 {% block content %}{{ block.super }}
-    <div class="template_download">
+    <div class="graduate_project_info_list">
         {#如果用户名（UserInfor的username）长度小于12位，则判定不是学号，即用户不是学生，提供下载链接#}
         {#        注意length过滤器只是计算列表长度，如果不加make_list过滤器直接计算结果为0#}
         {% if request.user|make_list|length < 10 %}

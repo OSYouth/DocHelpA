@@ -18,27 +18,27 @@ class AssignmentTemplate(models.Model):
                                    default='''本页面提供毕业设计任务书模板的维护和学院公章的添加\n
                                            毕业设计任务书中“一、毕业设计目标”一般会随论文主题不同而无法统一\n
                                            因此在“一、毕业设计目标”提供支持替换部分关键内容的功能\n
-                                           为减少负担，设计“一、毕业设计目标”的模板在教师维护后，替换部分可由学生在第6步填写，教师可以修改和填写\n
-                                           替换部分以{}表示，最多支持5个，请确保替换部分顺序一致\n
+                                           为减少负担，设计“一、毕业设计目标”的模板在教师维护后，替换部分内容建议由学生在第6步填写，教师可以修改和填写\n
+                                           替换部分以'*'表示，最多支持5个，请确保替换部分顺序一致\n
                                            毕业设计任务书模板默认以大数据技术专业为例显示
                                            ''')
     cachet = models.ImageField('学院公章', upload_to='cachet_img/')
-    goal = models.TextField('一、毕业设计目标', default='设计的目的在于考察学生利用大数据技术与应用专业知识进行大数据项目数据采集、处理及分析展示的能力。在指导教师的指导下，根据选择的毕业设计课题，获取{}的相关数据，利用大数据专业知识进行数据分析，并使用数据可视化技术对数据进行展示，为{}')
+    goal = models.TextField('一、毕业设计目标', default='设计的目的在于考察学生利用大数据技术与应用专业知识进行大数据项目数据采集、处理及分析展示的能力。在指导教师的指导下，根据选择的毕业设计课题，获*的相关数据，利用大数据专业知识进行数据分析，并使用数据可视化技术对数据进行展示，为*')
     task_require = models.TextField('二、毕业设计任务及要求')
     step_way = models.TextField('三、毕业设计实施步骤和方法')
     schdeule = models.TextField('四、毕业设计进程安排',
                                 default=f'''1．选题：\t{time.localtime().tm_year - 1}年11月23日-{time.localtime().tm_year - 1}年11月27日
-                                            2．撰写开题提纲：\t{time.localtime().tm_year - 1}年11月30日-{time.localtime().tm_year - 1}年12月13日
-                                            3．收集资料及实施设计\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日
-                                            4．完成毕业设计初稿：\t{time.localtime().tm_year}年3月1日前
-                                            5．完成毕业设计修改稿:\t{time.localtime().tm_year}年3月30日前
-                                            6．完成毕业设计定稿：\t{time.localtime().tm_year}年4月25日前
-                                            7．答辩：\t{time.localtime().tm_year}年5月18日前''')
+                                2．撰写开题提纲：\t{time.localtime().tm_year - 1}年11月30日-{time.localtime().tm_year - 1}年12月13日
+                                3．收集资料及实施设计\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日
+                                4．完成毕业设计初稿：\t{time.localtime().tm_year}年3月1日前
+                                5．完成毕业设计修改稿:\t{time.localtime().tm_year}年3月30日前
+                                6．完成毕业设计定稿：\t{time.localtime().tm_year}年4月25日前
+                                7．答辩：\t{time.localtime().tm_year}年5月18日前''')
     thought = models.TextField('五、设计思路')
     result = models.TextField('六、成果表现形式')
     comment = models.TextField('指导教师意见', default='')
     rws_date = models.CharField('任务书落款日期', max_length=30, default=f'{time.localtime().tm_year - 1}年12月10日')
-    instructor = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "3.毕业设计任务书模板（如果只有一种模板，建议直接点击修改）"
@@ -51,7 +51,8 @@ class AssignmentTemplate(models.Model):
 class GuideRecordTemplate(models.Model):
     instruction = models.TextField('说明', max_length=300,
                                    default='''本页面提供毕业设计指导记录表模板的维护\n
-                                               一般来说修改一次以后无需再修改''')
+                                              如果指导过程比较固定，一般来说修改一次以后无需再次修改\n
+                                              毕业设计指导记录表中的答辩一栏会根据第5步答辩信息表自动生成，无需填写''')
     guide_cont1 = models.CharField('指导内容1', max_length=30, default='毕业设计选题')
     guide_date1 = models.CharField('指导时间1', max_length=30, default=f'{time.localtime().tm_year - 1}年11月23日')
     guide_loca1 = models.CharField('指导地点1', max_length=50, default='网络通信工具')
@@ -62,24 +63,24 @@ class GuideRecordTemplate(models.Model):
     guide_loca2 = models.CharField('指导地点2', max_length=50, default='网络通信工具')
     guide_proc2 = models.TextField('指导过程记录2', default='下发毕业设计任务书，并指导学生制定毕业设计工作计划')
     guide_cont3 = models.CharField('指导内容3', max_length=30, default='毕业设计过程')
-    guide_date3 = models.CharField('指导时间3', max_length=30, default=f'{time.localtime().tm_year}年2月28日')
-    guide_loca3 = models.CharField('指导地点3', max_length=50, default='网络通信工具')
-    guide_proc3 = models.TextField('指导过程记录3',
+    guide_date3 = models.CharField('指导时间3_1', max_length=30, default=f'{time.localtime().tm_year}年2月28日')
+    guide_loca3 = models.CharField('指导地点3_1', max_length=50, default='网络通信工具')
+    guide_proc3 = models.TextField('指导过程记录3_1',
                                    default='上交初稿，指导老师审核初稿并提出修改意见，学生按照意见修改初稿')
-    guide_cont4 = models.CharField('指导内容4', max_length=30, default='')
-    guide_date4 = models.CharField('指导时间4', max_length=30, default=f'{time.localtime().tm_year}年3月30日')
-    guide_loca4 = models.CharField('指导地点4', max_length=50, default='网络通信工具')
-    guide_proc4 = models.TextField('指导过程记录4',
+    guide_cont3_2 = models.CharField('指导内容3_2', max_length=30, default='')
+    guide_date3_2 = models.CharField('指导时间3_2', max_length=30, default=f'{time.localtime().tm_year}年3月30日')
+    guide_loca3_2 = models.CharField('指导地点3_2', max_length=50, default='网络通信工具')
+    guide_proc3_2 = models.TextField('指导过程记录3_2',
                                    default='在初稿的基础上根据指导老师意见进行完善，上交第一次修改稿，老师审核后提出改进意见，并按照修改意见进行完善')
-    guide_cont5 = models.CharField('指导内容5', max_length=30, default='')
-    guide_date5 = models.CharField('指导时间5', max_length=30, default=f'{time.localtime().tm_year}年5月7日')
-    guide_loca5 = models.CharField('指导地点5', max_length=50, default='网络通信工具')
-    guide_proc5 = models.TextField('指导过程记录5',
+    guide_cont3_3 = models.CharField('指导内容3_3', max_length=30, default='')
+    guide_date3_3 = models.CharField('指导时间3_3', max_length=30, default=f'{time.localtime().tm_year}年5月7日')
+    guide_loca3_3 = models.CharField('指导地点3_3', max_length=50, default='网络通信工具')
+    guide_proc3_3 = models.TextField('指导过程记录3_3',
                                    default='在第一次修改稿的基础上进行完善，上交第二次修改稿，老师审核提出完善意见，并按照意见进行修改')
-    guide_cont6 = models.CharField('指导内容6', max_length=30, default='毕业设计选题')
-    guide_date6 = models.CharField('指导时间6', max_length=30, default=f'{time.localtime().tm_year}年5月13日')
-    guide_loca6 = models.CharField('指导地点6', max_length=50, default='网络通信工具')
-    guide_proc6 = models.TextField('指导过程记录6', default='对毕业设计文档内容及格式进行完善，并进行查重，上交最终稿')
+    guide_cont3_4 = models.CharField('指导内容3_4', max_length=30, default='')
+    guide_date3_4 = models.CharField('指导时间3_4', max_length=30, default=f'{time.localtime().tm_year}年5月13日')
+    guide_loca3_4 = models.CharField('指导地点3_4', max_length=50, default='网络通信工具')
+    guide_proc3_4 = models.TextField('指导过程记录3_4', default='对毕业设计文档内容及格式进行完善，并进行查重，上交最终稿')
     instructor = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
 
     class Meta:
@@ -100,17 +101,17 @@ class DefenceInfo(models.Model):
     design_type = models.CharField("毕业设计类型", max_length=20, default='')
     defence_date = models.CharField('答辩日期（格式2022年05月10日）', max_length=30, default='')
     defence_location = models.CharField("答辩地点", max_length=30, default='')
-    recorder = models.CharField('记录人', max_length=30, default='*')
+    recorder = models.CharField('记录人', max_length=30, default='')
     ach_grade = models.CharField('成果成绩', max_length=10, default='')
     defence_grade = models.CharField('答辩成绩', max_length=10, default='')
     final_grade = models.CharField("最终成绩", max_length=10, default='')
-    stu = models.OneToOneField(UserInfo, on_delete=models.CASCADE, default='')
     def_inst1 = models.CharField('答辩教师1', max_length=30, default='*')
     def_inst2 = models.CharField('答辩教师2', max_length=30, default='*')
     def_inst3 = models.CharField('答辩教师3', max_length=30, default='*')
     def_inst4 = models.CharField('答辩教师4', max_length=30, default='*')
     def_inst5 = models.CharField('答辩教师5', max_length=30, default='*')
     assignment_template_id = models.CharField('任务书模板ID',  max_length=30, default='')
+    stu = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
 
 # 6.毕业设计信息完善
 class GraduateProjectInfo(models.Model):
