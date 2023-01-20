@@ -22,7 +22,7 @@ class AssignmentTemplate(models.Model):
                                            替换部分以'*'表示，最多支持5个，请确保替换部分顺序一致\n
                                            毕业设计任务书模板默认以大数据技术专业为例显示
                                            ''')
-    cachet = models.ImageField('学院公章', upload_to='cachet_img/')
+    cachet = models.ImageField('学院公章（请注意去掉背景）', upload_to='cachet_img/')
     goal = models.TextField('一、毕业设计目标', default='设计的目的在于考察学生利用大数据技术与应用专业知识进行大数据项目数据采集、处理及分析展示的能力。在指导教师的指导下，根据选择的毕业设计课题，获*的相关数据，利用大数据专业知识进行数据分析，并使用数据可视化技术对数据进行展示，为*')
     task_require = models.TextField('二、毕业设计任务及要求')
     step_way = models.TextField('三、毕业设计实施步骤和方法')

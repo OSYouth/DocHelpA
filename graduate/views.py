@@ -13,6 +13,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT    #�
 import time
 import pandas as pd
 import numpy as np
+from .add_float_picture import add_float_picture
 
 # Create your views here.
 # 生成要下载的压缩包
@@ -240,11 +241,15 @@ def generate_rws(stu_no, inst_no, path):
     except Exception:
         p11_2.add_run().add_picture(f'static/缺失.jpeg', width=Cm(1.8))
         p11_2.add_run(dean.last_name + dean.first_name + "信息不完整，请联系其完善信息")
-    # p11_2.add_run().add_picture(f'media/{temp.cachet}', width=Cm(4))
+    add_float_picture(p11_2, f'media/{temp.cachet}', width=Cm(4.2), pos_x=Cm(1.5), pos_y=Cm(-0.3))
     table2.rows[1].cells[8].add_paragraph(temp.rws_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
     for i in range(2):
         table2.rows[i].height = Cm(1)
+
+    # p11_2.add_run().add_picture(f'media/{temp.cachet}', width=Cm(4))
+    # p = word.add_paragraph()
+    # add_float_picture(p, f'media/{temp.cachet}', width=Cm(3.6), pos_x=Cm(20), pos_y=Cm(30))
 
     bz1 = word.add_paragraph('注：1. 设计类型包括产品设计、流程设计或方案设计。')
     bz2 = word.add_paragraph('       2. 本表一式两份，一份二级学院留存，一份发给学生。')
@@ -493,7 +498,7 @@ def generate_pyb(stu_no, inst_no, path):
         tmp5.add_picture(f'media/{inst.sign}', width=Cm(1.8))
     except Exception:
         tmp5.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
-        tmp5.add_run(inst.last_name + inst.first_name + "信息不完整，请完善信息")
+        tmp5.add_text(inst.last_name + inst.first_name + "信息不完整，请完善信息")
     # row5_3.paragraph_format.first_line_indent = Pt(150)
     row5_3.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     tmp_day = pd.to_datetime(stu_defence.defence_date, format='%Y年%m月%d日')-pd.tseries.offsets.DateOffset(days=1)
@@ -665,7 +670,7 @@ def generate_dbjlb(stu_no, inst_no, path):
         tmp7.add_picture(f'media/{recorder.sign}', width=Cm(1.8))
     except Exception:
         tmp7.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
-        tmp7.add_text("答辩影像未上传，请完善信息")
+        tmp7.add_text(f"{recorder.last_name}{recorder.first_name}信息不完整，请联系其完善信息")
     table.rows[6].cells[0].paragraphs[1].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     table.rows[6].cells[0].add_paragraph(stu_defence.defence_date).paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     table.rows[6].cells[3].paragraphs[0].add_run('答辩小组成员（签字）：')
