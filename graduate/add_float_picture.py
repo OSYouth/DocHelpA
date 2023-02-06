@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 来源网址：
+# https://mp.weixin.qq.com/s?__biz=MzAxMjUyNDQ5OA==&mid=2653567483&idx=1&sn=4f81f386715209346a1d58357f4efc9c&chksm=806e1746b7199e50d5ff74d233ebf36cd8f49cc0c0c02c5e0cc21d5c3fa9d4797b45430b92e8&scene=27
 
 # filename: add_float_picture.py
 

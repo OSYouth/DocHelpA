@@ -27,6 +27,8 @@ class TopicBatchAdmin(admin.ModelAdmin):
                 change_graduateprojectinfo = Permission.objects.get(codename='change_graduateprojectinfo')
                 group = Group.objects.create(name="学生")
                 group.permissions.set([view_graduateprojectinfo, change_graduateprojectinfo])
+            else:
+                group = group[0]
             for i in range(stu_data[pd.notnull(stu_data['学号'])].shape[0]):
                 create_student(group, stu_data[pd.notnull(stu_data['学号'])].iloc[i].to_dict())
             # print(stu_data)
