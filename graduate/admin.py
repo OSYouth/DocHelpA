@@ -101,12 +101,12 @@ class GraduateProjectInfoAdmin(admin.ModelAdmin):
 # 通过选题信息表格 创建单个学生用户，并在GraduateProjectInfo中添加相应信息
 def create_student(group, dic):
     try:
-        stu = UserInfo.objects.create_user(username=dic.get('学号'), password='123456', first_name=dic.get('姓名')[1:],
-                                           last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'),
-                                           is_staff=1, major=dic.get('专业'))
+        stu = UserInfo.objects.create_user(username=dic.get('学号'), password='123456', first_name=dic.get('姓名')[1:], last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'), is_staff=1, major=dic.get('专业'), title='ungraduate')
         group.user_set.add(stu.id)
         GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'), class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
     except IntegrityError:  # 重复键值
+        # 为当年毕设没过的同学设计：可能指导教师已经创建了该学生，然后存在系统用户当中了
+        # UserInfo.objects.update_or_create(username=dic.get('学号'), password='123456', first_name=dic.get('姓名')[1:], last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'), is_staff=1, major=dic.get('专业'), title='ungraduate')
         pass
 
 def create_defence_info(dic):

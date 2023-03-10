@@ -19,10 +19,10 @@ class UserInfo(AbstractUser):
     in_case = models.CharField('备用字段', max_length=100, default='')
     # 教研室（教师）/专业（学生）
     major = models.CharField('教研室/专业', max_length=30, default='')
-    # 职称（教师）
-    title = models.CharField('职称', max_length=30, default='')
+    # 职称（教师）/毕业与否标志（学生）
+    title = models.CharField('职称/学生毕业标志', max_length=30, default='')
     class Meta:
-        verbose_name = "1.用户信息"
+        verbose_name = "1.用户信息（第一次登录时请务必完善！）"
         verbose_name_plural = verbose_name
 
 class InstructorBatch(models.Model):

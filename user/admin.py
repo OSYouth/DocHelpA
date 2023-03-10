@@ -53,8 +53,9 @@ class InstructorBatchAdmin(admin.ModelAdmin):
                 add_defencebatch = Permission.objects.get(codename='add_defencebatch')
                 view_graduateprojectinfo = Permission.objects.get(codename='view_graduateprojectinfo')
                 change_graduateprojectinfo = Permission.objects.get(codename='change_graduateprojectinfo')
+                delete_graduateprojectinfo = Permission.objects.get(codename='delete_graduateprojectinfo')
                 group = Group.objects.create(name="教师")
-                group.permissions.set([view_userinfo, change_userinfo, change_assignmenttemplate, view_assignmenttemplate,add_assignmenttemplate, change_guiderecordtemplate, view_guiderecordtemplate, add_topicbatch, add_defencebatch, view_graduateprojectinfo, change_graduateprojectinfo])
+                group.permissions.set([view_userinfo, change_userinfo, change_assignmenttemplate, view_assignmenttemplate,add_assignmenttemplate, change_guiderecordtemplate, view_guiderecordtemplate, add_topicbatch, add_defencebatch, view_graduateprojectinfo, change_graduateprojectinfo, delete_graduateprojectinfo])
             else:
                 group = group[0]
             for i in range(user_data[pd.notnull(user_data['工号'])].shape[0]):

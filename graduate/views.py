@@ -35,6 +35,7 @@ def download_files(request, by):
     if not os.path.exists(f_path):
         os.mkdir(f_path)
     instructor_number = request.user.username
+    # 已毕业的学生也要过滤掉，根据User_Info.title != 'ungraduate'进行判断
     student_charge_set = GraduateProjectInfo.objects.filter(instructor=request.user.last_name+request.user.first_name)
     if by == 'student_number':
         # 存储此次所有文件 的文件夹的路径，名字不同以秒间隔开来，所以没有做路径是否存在的判断
@@ -112,9 +113,9 @@ def generate_rws(stu_no, inst_no, path):
     stu_project = GraduateProjectInfo.objects.get(stu=stu)
     stu_defence = DefenceInfo.objects.get(stu=stu)
     temp_set = AssignmentTemplate.objects.filter(instructor=inst)
-    temp = temp_set[0]
+    temp = temp_set[0]  # 默认使用教师名下的第一个模板
     temp_set_id_list = list(AssignmentTemplate.objects.filter(instructor=inst).values_list('id', flat=True))
-    # 判断学生答辩信息中模板id是否在  获取所有模板的ID列表 中
+    # 判断学生答辩信息中模板id是否在 获取所有模板的ID列表 中
     if stu_defence.assignment_template_id in list(map(str,temp_set_id_list)):
         temp = temp_set.get(id=stu_defence.assignment_template_id)
     word_name = stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计任务书.docx"
@@ -273,7 +274,7 @@ def generate_zdjlb(stu_no, inst_no, path):
     grtemp = GuideRecordTemplate.objects.get(instructor=inst)
     word_name =stu_no + "+" + stu_project.class_name + "+" + stu.last_name + stu.first_name + "+毕业设计指导记录表.docx"
     word = Document()
-    # 先对于文档英文为Arial，中文为宋体所有字体设置为小四，所有字体设置为小四，
+    # 先对于文档英文为Arial，中文为宋体，所有字体设置为小四
     word.styles['Normal'].font.name = 'Arial'
     word.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
     word.styles['Normal'].font.size = Pt(12)
