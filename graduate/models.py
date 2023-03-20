@@ -117,11 +117,11 @@ class DefenceInfo(models.Model):
 class GraduateProjectInfo(models.Model):
     director = models.CharField('专业教研室主任', max_length=30, default='')
     dean = models.CharField('院长', max_length=30, default='')
-    key_word1 = models.CharField('毕业设计评阅书替换字1', max_length=200, default='*')
-    key_word2 = models.CharField('毕业设计评阅书替换字2', max_length=200, default='*')
-    key_word3 = models.CharField('毕业设计评阅书替换字3', max_length=200, default='*')
-    key_word4 = models.CharField('毕业设计评阅书替换字4', max_length=200, default='*')
-    key_word5 = models.CharField('毕业设计评阅书替换字5', max_length=200, default='*')
+    key_word1 = models.CharField('毕业设计任务书替换字1', max_length=200, default='*')
+    key_word2 = models.CharField('毕业设计任务书替换字2', max_length=200, default='*')
+    key_word3 = models.CharField('毕业设计任务书替换字3', max_length=200, default='*')
+    key_word4 = models.CharField('毕业设计任务书替换字4', max_length=200, default='*')
+    key_word5 = models.CharField('毕业设计任务书替换字5', max_length=200, default='*')
     # 选题名称（学生）
     topic = models.CharField('选题名称', max_length=30, default='')
     # 班级（学生）
@@ -133,7 +133,7 @@ class GraduateProjectInfo(models.Model):
     instructor = models.CharField('指导教师', max_length=30, default='')
 
     class Meta:
-        verbose_name = "6.毕业设计信息完善（学生填写，教师可以修改）"
+        verbose_name = "6.毕业设计信息完善（学生填写，教师修改）"
         verbose_name_plural = verbose_name
 
 # 7.部门信息维护（了解怎么在一个model里面添加多个外键之后再优化）
