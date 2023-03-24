@@ -95,7 +95,7 @@ class GraduateProjectInfoAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         elif len(request.user.username) < 12:   #教师工号一般为5位，小于学号的12位
-            return qs.filter(instructor = (request.user.last_name+request.user.first_name))
+            return qs.filter(instructor=(request.user.last_name+request.user.first_name)).filter(stu__title="ungraduate")
             # 也要过滤掉title!='ungraduated'的学生
         return qs.filter(stu=request.user)
 
