@@ -36,7 +36,7 @@ def download_files(request, by):
         os.mkdir(f_path)
     instructor_number = request.user.username
     # 已毕业的学生也要过滤掉，根据User_Info.title != 'ungraduate'进行判断
-    student_charge_set = GraduateProjectInfo.objects.filter(instructor=request.user.last_name+request.user.first_name)
+    student_charge_set = GraduateProjectInfo.objects.filter(instructor=request.user.last_name+request.user.first_name).filter(stu__title="ungraduate")
     if by == 'student_number':
         # 存储此次所有文件 的文件夹的路径，名字不同以秒间隔开来，所以没有做路径是否存在的判断
         filename = f'{request.user.last_name + request.user.first_name}（按学号创建）{pd.Timestamp.today().strftime("%Y%m%d%H%M%S")}'

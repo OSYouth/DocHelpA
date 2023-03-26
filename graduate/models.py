@@ -117,11 +117,11 @@ class DefenceInfo(models.Model):
 class GraduateProjectInfo(models.Model):
     director = models.CharField('专业教研室主任', max_length=30, default='')
     dean = models.CharField('院长', max_length=30, default='')
-    key_word1 = models.CharField('毕业设计任务书替换字1', max_length=200, default='*')
-    key_word2 = models.CharField('毕业设计任务书替换字2', max_length=200, default='*')
-    key_word3 = models.CharField('毕业设计任务书替换字3', max_length=200, default='*')
-    key_word4 = models.CharField('毕业设计任务书替换字4', max_length=200, default='*')
-    key_word5 = models.CharField('毕业设计任务书替换字5', max_length=200, default='*')
+    key_word1 = models.CharField('毕业设计目标第1个*号替换内容', max_length=200, default='*')
+    key_word2 = models.CharField('毕业设计目标第2个*号替换内容', max_length=200, default='*')
+    key_word3 = models.CharField('毕业设计目标第3个*号替换内容', max_length=200, default='*')
+    key_word4 = models.CharField('毕业设计目标第4个*号替换内容', max_length=200, default='*')
+    key_word5 = models.CharField('毕业设计目标第5个*号替换内容', max_length=200, default='*')
     # 选题名称（学生）
     topic = models.CharField('选题名称', max_length=30, default='')
     # 班级（学生）

@@ -85,11 +85,14 @@ class DefenceBatchAdmin(admin.ModelAdmin):
 @admin.register(GraduateProjectInfo)
 class GraduateProjectInfoAdmin(admin.ModelAdmin):
     change_list_template = 'admin/graduate/graduateprojectinfo/info_list.html'
-    list_display = ['stu', 'class_name', 'dean', 'director', 'instructor', 'topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
+    @admin.display(description='毕业设计目标')
+    def assignment_template_goal(self, obj):
+        return AssignmentTemplate.objects.get(id=DefenceInfo.objects.get(stu=obj.stu).assignment_template_id).goal if obj.stu.title else ''
+    list_display = ['stu', 'class_name', 'dean', 'director', 'instructor', 'topic','assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
     list_editable = ['topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'self_report', 'quiz']
     # list_display_links = ['stu']
-    fields = ['topic', ('class_name', 'stu'), ('dean', 'director', 'instructor'), 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
-    readonly_fields = [ 'class_name', 'instructor', 'stu']
+    fields = ['topic', ('class_name', 'stu'), ('dean', 'director', 'instructor'),'assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
+    readonly_fields = [ 'class_name', 'instructor', 'assignment_template_goal', 'stu']
     def get_queryset(self, request):
         qs = super(GraduateProjectInfoAdmin, self).get_queryset(request)
         if request.user.is_superuser:
