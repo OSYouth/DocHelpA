@@ -85,14 +85,20 @@ class DefenceBatchAdmin(admin.ModelAdmin):
 @admin.register(GraduateProjectInfo)
 class GraduateProjectInfoAdmin(admin.ModelAdmin):
     change_list_template = 'admin/graduate/graduateprojectinfo/info_list.html'
+
+    @admin.display(description='姓名')
+    def stu_name(self, obj):
+        return UserInfo.objects.get(username=obj.stu).last_name+UserInfo.objects.get(username=obj.stu).first_name if obj.stu else ''
+
     @admin.display(description='毕业设计目标')
     def assignment_template_goal(self, obj):
         return AssignmentTemplate.objects.get(id=DefenceInfo.objects.get(stu=obj.stu).assignment_template_id).goal if obj.stu.title else ''
-    list_display = ['stu', 'class_name', 'dean', 'director', 'instructor', 'topic','assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
+
+    list_display = ['stu', 'stu_name', 'class_name', 'dean', 'director', 'instructor', 'topic','assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
     list_editable = ['topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'self_report', 'quiz']
     # list_display_links = ['stu']
-    fields = ['topic', ('class_name', 'stu'), ('dean', 'director', 'instructor'),'assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
-    readonly_fields = [ 'class_name', 'instructor', 'assignment_template_goal', 'stu']
+    fields = ['topic', ('class_name', 'stu', 'stu_name'), ('dean', 'director', 'instructor'),'assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
+    readonly_fields = [ 'class_name', 'instructor', 'assignment_template_goal', 'stu', 'stu_name']
     def get_queryset(self, request):
         qs = super(GraduateProjectInfoAdmin, self).get_queryset(request)
         if request.user.is_superuser:
@@ -110,12 +116,12 @@ def create_student(group, dic):
         GraduateProjectInfo.objects.create(stu=stu, topic=dic.get('选题名称'), instructor=dic.get('指导老师'), class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
     except IntegrityError:  # 重复键值
         # 为当年毕设没过的同学设计：可能指导教师已经创建了该学生，然后存在系统用户当中了
-        # UserInfo.objects.update_or_create(username=dic.get('学号'), password='123456', first_name=dic.get('姓名')[1:], last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'), is_staff=1, major=dic.get('专业'), title='ungraduate')
-        pass
+        stu = UserInfo.objects.filter(username=dic.get('学号'))
+        stu.update(first_name=dic.get('姓名')[1:], last_name=dic.get('姓名')[:1], dept_name=dic.get('学院'), is_staff=1, major=dic.get('专业'), title='ungraduate')
+        GraduateProjectInfo.objects.update_or_create(stu=stu[0], topic=dic.get('选题名称'), instructor=dic.get('指导老师'), class_name=dic.get('班级'), director=dic.get('专业教研室主任'), dean=dic.get('学院院长'))
 
 def create_defence_info(dic):
     try:
-        DefenceInfo.objects.update_or_create(stu=UserInfo.objects.get(username=dic.get('学号')), design_type=dic.get("毕业设计类型"), defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"), recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'), final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'), def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'), def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
+        DefenceInfo.objects.create(stu=UserInfo.objects.get(username=dic.get('学号')), design_type=dic.get("毕业设计类型"), defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"), recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'), final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'), def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'), def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
     except IntegrityError:  # 重复键值
-        pass
-
+        DefenceInfo.objects.filter(stu=UserInfo.objects.get(username=dic.get('学号'))).update(design_type=dic.get("毕业设计类型"), defence_date=dic.get('答辩日期（格式2022年05月10日）'), defence_location=dic.get("答辩地点"), recorder=dic.get('记录人'), ach_grade=dic.get('成果成绩'), defence_grade=dic.get('答辩成绩'), final_grade=dic.get("最终成绩"), def_inst1=dic.get('答辩教师1'), def_inst2=dic.get('答辩教师2'), def_inst3=dic.get('答辩教师3'), def_inst4=dic.get('答辩教师4'), def_inst5=dic.get('答辩教师5'), assignment_template_id=dic.get('任务书模板ID'))
