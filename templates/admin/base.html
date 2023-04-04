@@ -19,13 +19,25 @@
         {#        <p>毕业设计任务书、指导记录表、评阅表、答辩记录表</p>#}
         {#        <p>最快可以不到1分钟生成以上所有文档</p>#}
         <div>
-            <a href="#">使用教程文档</a>
-            &nbsp&nbsp&nbsp&nbsp
-            <a href="#">使用教程视频</a>
+            {% if request.user|make_list|length < 6 %}
+
+                <a style="color: red"
+                   href="https://www.ixigua.com/7218076634636059168">毕业设计文档助手使用指南（教师版）视频</a>
+                <br>
+                <a style="color: red"
+                   href="/static/毕业设计文档助手使用指南（教师版）.pdf">毕业设计文档助手使用指南（教师版）手册</a>
+                <br><br>
+            {% endif %}
+            <a href="https://www.ixigua.com/7218076349242704388">毕业设计文档助手使用指南（学生版）视频</a>
+            <br>
+            <a style="color: red"
+               href="/static/毕业设计文档助手使用指南（学生版）.pdf">毕业设计文档助手使用指南（学生版）手册</a>
         </div>
         <br>
         <p>账号：工号/学号&nbsp&nbsp&nbsp&nbsp初始密码：123456</p>
-        <p>如果有任何建议或者发现任何bug，请发送至 lichi621@outlook.com</p>
-
+        <p>登录后可查看更多的指南信息</p>
+        {% if request.user|make_list|length < 13 %}
+            <p>如果有任何建议或者发现任何bug，请发送至 lichi621@outlook.com</p>
+        {% endif %}
     </div>
 {% endblock %}

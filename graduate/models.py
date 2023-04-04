@@ -29,7 +29,7 @@ class AssignmentTemplate(models.Model):
     schdeule = models.TextField('四、毕业设计进程安排',
                                 default=f'''1．选题：\t{time.localtime().tm_year - 1}年11月23日-{time.localtime().tm_year - 1}年11月27日
                                 2．撰写开题提纲：\t{time.localtime().tm_year - 1}年11月30日-{time.localtime().tm_year - 1}年12月13日
-                                3．收集资料及实施设计\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日
+                                3．收集资料及实施设计：\t{time.localtime().tm_year - 1}年12月14日-{time.localtime().tm_year}年2月28日
                                 4．完成毕业设计初稿：\t{time.localtime().tm_year}年3月1日前
                                 5．完成毕业设计修改稿:\t{time.localtime().tm_year}年3月30日前
                                 6．完成毕业设计定稿：\t{time.localtime().tm_year}年4月25日前

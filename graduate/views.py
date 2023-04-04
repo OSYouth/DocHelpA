@@ -186,7 +186,7 @@ def generate_rws(stu_no, inst_no, path):
     table.rows[5].cells[0].add_paragraph().add_run('\t'+temp.step_way.replace('\r\n','\n\t'))
 
     table.rows[6].cells[0].paragraphs[0].add_run('四、毕业设计进程安排')
-    table.rows[6].cells[0].add_paragraph().add_run('\t'+temp.schdeule.replace('\n\n','\n\t'))
+    table.rows[6].cells[0].add_paragraph().add_run('\t'+temp.schdeule.replace(" ","").replace('\n','\n\t'))
 
     table.rows[7].cells[0].paragraphs[0].add_run('五、设计思路')
     table.rows[7].cells[0].add_paragraph().add_run('\t'+temp.thought.replace('\r\n','\n\t'))
