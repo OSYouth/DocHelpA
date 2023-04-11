@@ -131,6 +131,8 @@ class GraduateProjectInfo(models.Model):
     quiz = models.TextField("提问与回答")
     stu = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
     instructor = models.CharField('指导教师', max_length=30, default='')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "6.毕业设计信息完善（学生填写，教师修改）"

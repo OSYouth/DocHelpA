@@ -1,0 +1,1 @@
+default_app_config = 'graduate.apps.GraduateConfig'

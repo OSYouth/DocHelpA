@@ -13,6 +13,7 @@
         {#        注意length过滤器只是计算列表长度，如果不加make_list过滤器直接计算结果为0#}
         {% if request.user|make_list|length < 10 %}
             <p style="color:red;">该页面提供名下学生信息检查，请确保所有步骤完成，信息完整之后再下载</p>
+            <p style="color:red;">如果只需下载勾选学生的文件资料，请点击左上角的下拉框选择后点击执行</p>
             <a href="/graduate/download_files/student_number">以学号分类</a>
             &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
             <a href="/graduate/download_files/file_type">以文件类型分类</a>

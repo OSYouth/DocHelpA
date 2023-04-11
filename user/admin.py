@@ -8,9 +8,9 @@ from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group, Permission
 import qrcode
 
-admin.site.site_header = '毕业设计文档助手'
+admin.site.site_header = '文档助手'
 admin.site.site_title = "文档自动生成 提高工作效率"
-admin.site.index_title = '毕业设计文档助手'
+admin.site.index_title = '文档助手'
 
 @admin.register(UserInfo)
 class UserInfoAdmin(admin.ModelAdmin):
