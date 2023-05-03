@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')),
     path('graduate/', include('graduate.urls')),
+    path('grades/', include('grades.urls')),
 ]
 
 if not settings.DEBUG:

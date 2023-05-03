@@ -12,7 +12,7 @@ class TopicBatch(models.Model):
         verbose_name_plural = verbose_name
 
 
-# 毕业设计任务书模板设定，一个老师一个模板
+# 毕业设计任务书模板设定，一个老师支持多个模板
 class AssignmentTemplate(models.Model):
     instruction = models.TextField('说明', max_length=300,
                                    default='''本页面提供毕业设计任务书模板的维护和学院公章的添加\n
@@ -38,7 +38,7 @@ class AssignmentTemplate(models.Model):
     result = models.TextField('六、成果表现形式')
     comment = models.TextField('指导教师意见', default='')
     rws_date = models.CharField('任务书落款日期', max_length=30, default=f'{time.localtime().tm_year - 1}年12月10日')
-    instructor = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(UserInfo, on_delete=models.CASCADE, verbose_name='教师ID（本系统ID和工号可能不同，请勿修改）')
 
     class Meta:
         verbose_name = "3.毕业设计任务书模板（如果只有一种模板，建议直接点击修改）"

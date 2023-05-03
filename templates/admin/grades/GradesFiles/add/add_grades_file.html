@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% block extrastyle %}{{ block.super }}
+    <style>
+        .temp {
+            margin: auto;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}{{ block.super }}
+    <div class="temp">
+        <p>本页面点击“保存”后下载压缩包中的文件均按照最新的学生成绩管理办法要求</p>
+        <p>下载的文件仅供参考，不作为最后提交OA的依据，请各位认真检查</p>
+    </div>
+{% endblock %}

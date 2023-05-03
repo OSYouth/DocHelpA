@@ -13,7 +13,6 @@ from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse
 from .models import *
 from django.contrib.auth.decorators import login_required
-# from user.models import UserInfo
 from docx import Document
 from docx.shared import Pt,Cm    #字号
 from docx.oxml.ns import qn    #字体
@@ -61,6 +60,7 @@ class AssignmentTemplateAdmin(admin.ModelAdmin):
     list_display = ['id','instruction']
     readonly_fields = ['instruction', 'schdeule']
     fields = ['instruction', 'cachet', 'goal', 'task_require', 'step_way', 'schdeule', 'thought', 'result', 'comment', 'rws_date', 'instructor']
+    raw_id_fields = ('instructor',)
     def get_queryset(self, request):
         qs = super(AssignmentTemplateAdmin, self).get_queryset(request)
         if request.user.is_superuser:
@@ -125,7 +125,12 @@ class GraduateProjectInfoAdmin(admin.ModelAdmin):
 
     @admin.display(description='毕业设计目标')
     def assignment_template_goal(self, obj):
-        return AssignmentTemplate.objects.get(id=DefenceInfo.objects.get(stu=obj.stu).assignment_template_id).goal if obj.stu.title else ''
+        if obj.stu.title:
+            temp = AssignmentTemplate.objects.get(id=DefenceInfo.objects.get(stu=obj.stu).assignment_template_id).goal
+            if len(str(temp)) > 30:
+                return '{}...'.format(str(temp)[0:30])
+        else:
+            return ''
 
     list_display = ['stu', 'stu_name', 'class_name', 'dean', 'director', 'instructor', 'topic','assignment_template_goal', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'defence_image', 'self_report', 'quiz']
     list_editable = ['topic', 'key_word1', 'key_word2', 'key_word3', 'key_word4', 'key_word5', 'self_report', 'quiz']

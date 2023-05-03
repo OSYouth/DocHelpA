@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import *
 from graduate.models import *
+from grades.models import *
 import pandas as pd
 import numpy as np
 from django.shortcuts import render, redirect
@@ -73,5 +74,9 @@ def create_instructor(group, dic):
         group.user_set.add(instructor.id)
         AssignmentTemplate.objects.create(instructor=instructor)
         GuideRecordTemplate.objects.create(instructor=instructor)
+        AnalysisTemplate.objects.create(instructor=instructor)
     except IntegrityError:  # 重复键值
+        # instructor = UserInfo.objects.filter(username=dic.get('工号'))
+        # if not AnalysisTemplate.objects.filter(instructor=instructor):
+        #     AnalysisTemplate.objects.create(instructor=instructor)
         pass
