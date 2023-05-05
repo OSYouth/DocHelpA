@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import Q
+
 from .models import *
 from user.models import UserInfo
 import pandas as pd
@@ -156,6 +158,13 @@ class GraduateProjectInfoAdmin(admin.ModelAdmin):
         if not os.path.exists(f_path):
             os.mkdir(f_path)
         instructor_number = request.user.username
+        if len(instructor_number) == 12: #学生用户时
+            instructor_username_temp =GraduateProjectInfo.objects.get(stu_id=request.user).instructor
+            instructor_temp = UserInfo.objects.filter(
+                Q(last_name=instructor_username_temp[0]) & Q(first_name=instructor_username_temp[1:]))
+            if len(instructor_temp) > 1:    #同名时默认为第一个，这个其实还是有问题的
+                instructor_temp = instructor_temp[0]
+            instructor_number = instructor_temp[0].username
 
         filename = f'{request.user.last_name + request.user.first_name}（按学号创建）{pd.Timestamp.today().strftime("%Y%m%d%H%M%S")}'
         downfile_path = f_path + "/" + filename
@@ -810,7 +819,9 @@ def generate_dbjlb(stu_no, inst_no, path):
     table.rows[6].cells[0].paragraphs[0].add_run('记录人（签字）：')
     tmp7 = table.rows[6].cells[0].add_paragraph().add_run()
     try:
-        recorder = UserInfo.objects.get(last_name=stu_defence.recorder[0], first_name=stu_defence.recorder[1:])
+        # recorder = UserInfo.objects.get(last_name=stu_defence.recorder[0], first_name=stu_defence.recorder[1:])
+        # 默认为查询集的第一个元素，还是有一定问题的
+        recorder = UserInfo.objects.filter(Q(last_name=stu_defence.recorder[0])&Q(first_name=stu_defence.recorder[1:]))[0]
         tmp7.add_picture(f'media/{recorder.sign}', width=Cm(1.8))
     except Exception:
         tmp7.add_picture(f'static/缺失.jpeg', width=Cm(1.8))
